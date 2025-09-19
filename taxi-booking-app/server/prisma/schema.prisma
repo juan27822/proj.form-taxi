@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Booking {
+  id                      String    @id
+  receivedAt              DateTime  @default(now())
+  status                  String    @default("pending")
+
+  // Customer info
+  name                    String
+  phone                   String
+  email                   String?
+  people                  Int
+  hasMinors               Boolean?  @default(false)
+  minorsAge               String?
+  needsBabySeat           Boolean?  @default(false)
+  needsBooster            Boolean?  @default(false)
+  luggageType             String?
+
+  // Arrival info
+  arrival_date            String
+  arrival_time            String
+  arrival_flight_number   String?
+  destination             String
+
+  // Return trip info (optional)
+  return_date             String?
+  return_time             String?
+  return_flight_time      String?
+  return_pickup_address   String?
+  return_flight_number    String?
+
+  // Additional info
+  additional_info         String?
+
+  // Modification info
+  isModification          Boolean?  @default(false)
+  originalBookingId       String?
+  lang                    String?
+
+  // Driver info
+  driver   Driver? @relation(fields: [driverId], references: [id])
+  driverId String?
+}
+
+model Driver {
+  id      String @id @default(cuid())
+  name    String
+  phone   String
+  bookings Booking[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String @id @default(cuid())
+  username  String @unique
+  password  String
+  role      Role   @default(USER)
+}

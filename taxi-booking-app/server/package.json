@@ -1,0 +1,28 @@
+{
+  "name": "taxi-booking-server",
+  "version": "1.0.0",
+  "description": "Server for the taxi booking app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.15.0",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^4.19.2",
+    "joi": "^18.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.0",
+    "nodemailer": "^7.0.6",
+    "pino": "^9.9.4",
+    "pino-pretty": "^13.1.1",
+    "socket.io": "^4.0.0",
+    "taxi-booking-app": "file:.."
+  },
+  "devDependencies": {
+    "prisma": "^6.15.0"
+  }
+}

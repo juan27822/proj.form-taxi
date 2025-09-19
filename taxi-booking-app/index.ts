@@ -1,0 +1,1 @@
+console.log('Root index.ts loaded');

@@ -1,0 +1,16 @@
+.main-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.booking-form-container {
+  flex: 2;
+  min-width: 300px;
+}
+
+.services-info-container-wrapper {
+  flex: 1;
+  min-width: 300px;
+}

@@ -1,0 +1,27 @@
+-- CreateTable
+CREATE TABLE "Booking" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "receivedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "name" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
+    "email" TEXT,
+    "people" INTEGER NOT NULL,
+    "hasMinors" BOOLEAN DEFAULT false,
+    "minorsAge" TEXT,
+    "needsBabySeat" BOOLEAN DEFAULT false,
+    "needsBooster" BOOLEAN DEFAULT false,
+    "luggageType" TEXT,
+    "arrival_date" TEXT NOT NULL,
+    "arrival_time" TEXT NOT NULL,
+    "arrival_flight_number" TEXT,
+    "destination" TEXT NOT NULL,
+    "return_date" TEXT,
+    "return_time" TEXT,
+    "return_flight_time" TEXT,
+    "return_pickup_address" TEXT,
+    "return_flight_number" TEXT,
+    "additional_info" TEXT,
+    "isModification" BOOLEAN DEFAULT false,
+    "originalBookingId" TEXT
+);

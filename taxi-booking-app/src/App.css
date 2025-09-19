@@ -1,0 +1,50 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: var(--neutral-dark);
+  padding: 20px;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.App-logo {
+  height: 60px;
+}
+
+.App-header h1 {
+    margin: 0;
+    color: var(--text-light);
+}
+
+.logo-placeholder {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--primary-orange);
+}
+
+.App-main {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 40px;
+  padding: 20px;
+  align-items: start;
+}
+
+.form-container, .list-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+h2 {
+    color: var(--primary-blue);
+    border-bottom: 2px solid var(--primary-orange);
+    padding-bottom: 10px;
+}
