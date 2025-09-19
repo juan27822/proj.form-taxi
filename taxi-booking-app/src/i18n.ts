@@ -21,7 +21,7 @@ i18n
         translation: deTranslation,
       },
     },
-    fallbackLng: 'en',
+    fallbackLng: 'es',
     debug: true,
     interpolation: {
       escapeValue: false, // React already safes from xss

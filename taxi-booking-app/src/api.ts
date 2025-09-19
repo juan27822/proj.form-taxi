@@ -13,6 +13,18 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 403 && error.response.data.message === 'jwt expired') {
+      // Token expired, log out user
+      localStorage.removeItem('token');
+      window.location.href = '/login'; // Redirect to login page
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const login = async (credentials: Credentials) => {
   const response = await api.post('/login', credentials);
   if (response.data.accessToken) {
