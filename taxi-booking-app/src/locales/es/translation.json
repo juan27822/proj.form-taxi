@@ -172,5 +172,17 @@
   "one_way_trips": "Solo Ida",
   "round_trips": "Ida y Vuelta",
   "bookings_by_hour_chart_title": "Reservas por Hora del Día",
-  "...": "..."
+  "status_label": "Estado",
+  "hasMinors_label": "¿Hay menores?",
+  "minorsAge_label": "Edad de los menores",
+  "needsBabySeat_label": "¿Necesita silla de bebé?",
+  "needsBooster_label": "¿Necesita elevador?",
+  "luggageType_label": "Tipo de equipaje",
+  "arrival_flight_number_label": "Número de Vuelo de Llegada",
+  "return_pickup_address_label": "Dirección de Recogida de Vuelta",
+  "return_flight_number_label": "Número de Vuelo de Salida",
+  "additional_info_label": "Información Adicional",
+  "isModification_label": "¿Es una modificación?",
+  "originalBookingId_label": "ID de Reserva Original",
+  "lang_label": "Idioma"
 }

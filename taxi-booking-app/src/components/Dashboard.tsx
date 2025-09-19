@@ -2,27 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer 
-} from 'recharts'; // Removed Tooltip, Legend
+} from 'recharts';
 import { getDashboardBookingsByDay, getDashboardPopularDestinations } from '../api';
-import { BookingsByPeriod } from '../types'; // Import BookingsByPeriod type
-import styles from './ChartsPage.module.css'; // Import CSS Modules
+import { BookingsByPeriod } from '../types';
 
-// Recharts expects data in the format { name: string, value: number } for simple charts
-interface RechartsDataItem {
-  name: string;
-  value: number;
-}
+const dashboardContainerStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, 1fr)',
+  gap: '20px',
+  width: '90%',
+  margin: '20px auto',
+};
 
-// Data structure for popular destinations from backend
-interface PopularDestinationData {
-  destination: string;
-  count: number;
-}
+const dashboardItemStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '15px',
+  border: '1px solid #ccc',
+  borderRadius: '8px',
+  boxSizing: 'border-box',
+};
+
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
-  const [bookingsByDay, setBookingsByDay] = useState<RechartsDataItem[]>([]);
-  const [popularDestinations, setPopularDestinations] = useState<RechartsDataItem[]>([]);
+  const [bookingsByDay, setBookingsByDay] = useState<any[]>([]);
+  const [popularDestinations, setPopularDestinations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,28 +36,21 @@ const Dashboard: React.FC = () => {
       setError(null);
       try {
         const [byDayResult, popularResult] = await Promise.all([
-          getDashboardBookingsByDay('day'), // Requesting 'day' period for simplicity
+          getDashboardBookingsByDay('day'),
           getDashboardPopularDestinations(5),
         ]);
 
-        console.log("API Result - byDayResult:", byDayResult); // Debug log
-        console.log("API Result - popularResult:", popularResult); // Debug log
-
-        // Transform bookingsByDay data for Recharts (sum oneWay and roundTrip)
-        const transformedBookingsByDay: RechartsDataItem[] = byDayResult.map((item: BookingsByPeriod) => ({
+        const transformedBookingsByDay = byDayResult.map((item: BookingsByPeriod) => ({
           name: item.period,
           value: item.oneWay + item.roundTrip,
         }));
         setBookingsByDay(transformedBookingsByDay);
-        console.log("Transformed - bookingsByDay:", transformedBookingsByDay); // Debug log
 
-        // Transform popularDestinations data for Recharts
-        const transformedPopularDestinations: RechartsDataItem[] = popularResult.map((item: PopularDestinationData) => ({
+        const transformedPopularDestinations = popularResult.map((item: any) => ({
           name: item.destination,
           value: item.count,
         }));
         setPopularDestinations(transformedPopularDestinations);
-        console.log("Transformed - popularDestinations:", transformedPopularDestinations); // Debug log
 
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
@@ -64,7 +61,7 @@ const Dashboard: React.FC = () => {
     };
 
     fetchData();
-  }, [t]); // Dependency on 't' for translation updates
+  }, [t]);
 
   if (loading) {
     return <p>{t('loading_data')}...</p>;
@@ -75,38 +72,34 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className={styles.dashboardChartsContainer}>
-      <div className={styles.dashboardChartItem}>
+    <div style={dashboardContainerStyle}>
+      <div style={dashboardItemStyle}>
         <h3>{t('dashboard_bookings_last_7_days')}</h3>
-        {bookingsByDay.length > 0 && ( // Conditional rendering
+        {bookingsByDay.length > 0 && (
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={bookingsByDay}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              {/* <Tooltip /> */} {/* Removed */}
-              {/* <Legend /> */} {/* Removed */}
               <Line type="monotone" dataKey="value" stroke="#8884d8" name={t('bookings_count')} />
             </LineChart>
           </ResponsiveContainer>
         )}
-        {bookingsByDay.length === 0 && !loading && !error && <p>{t('no_data_available')}</p>} {/* Added no data message */}
+        {bookingsByDay.length === 0 && !loading && !error && <p>{t('no_data_available')}</p>}
       </div>
-      <div className={styles.dashboardChartItem}>
+      <div style={dashboardItemStyle}>
         <h3>{t('dashboard_top_5_destinations')}</h3>
-        {popularDestinations.length > 0 && ( // Conditional rendering
+        {popularDestinations.length > 0 && (
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={popularDestinations}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              {/* <Tooltip /> */} {/* Removed */}
-              {/* <Legend /> */} {/* Removed */}
               <Bar dataKey="value" fill="#82ca9d" name={t('bookings_count')} />
             </BarChart>
           </ResponsiveContainer>
         )}
-        {popularDestinations.length === 0 && !loading && !error && <p>{t('no_data_available')}</p>} {/* Added no data message */}
+        {popularDestinations.length === 0 && !loading && !error && <p>{t('no_data_available')}</p>}
       </div>
     </div>
   );

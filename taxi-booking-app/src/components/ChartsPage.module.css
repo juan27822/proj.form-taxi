@@ -2,65 +2,28 @@
   padding: 20px;
 }
 
-.all-charts-container {
-  display: flex;
-  flex-wrap: wrap;
-  /* Removed gap for testing */
-  justify-content: center; /* Centrar los gráficos */
-  width: 800px; /* Forcing a fixed width for testing */
-  margin: 0 auto; /* Center the container */
-}
-
-.chart-section {
-  width: 50% !important; /* Force 2 per row, simplified */
-  flex: 0 0 auto; /* Reset flex to allow width to take precedence */
-  max-width: none; /* Reset max-width */
-  padding: 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-sizing: border-box;
-}
-
+.all-charts-container,
 .dashboard-charts-container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
-  justify-content: center;
-  width: 800px; /* Forcing a fixed width for testing */
-  margin: 0 auto; /* Center the container */
+  width: 90%;
+  margin: 20px auto;
 }
 
+.chart-section,
 .dashboard-chart-item {
-  width: 50% !important; /* Force 2 per row, simplified */
-  flex: 0 0 auto; /* Reset flex to allow width to take precedence */
-  min-width: 300px; /* Keep min-width */
-  max-width: none; /* Reset max-width */
+  width: 100%;
   padding: 15px;
   border: 1px solid #ccc;
   border-radius: 8px;
   box-sizing: border-box;
 }
 
-/* Media queries para responsividad */
-/* On screens wider than 1200px, they will use the base flex/max-width (e.g., 3-4 per row) */
-
-@media (max-width: 1200px) {
-  .chart-section, .dashboard-chart-item { /* Apply to both */
-    flex: 0 0 calc(33.333% - 20px); /* Try to fit 3 per row */
-    max-width: calc(33.333% - 20px);
-  }
-}
-
-@media (max-width: 900px) { /* New breakpoint for 2 per row */
-  .chart-section, .dashboard-chart-item { /* Apply to both */
-    flex: 0 0 calc(50% - 20px); /* 2 per row */
-    max-width: calc(50% - 20px);
-  }
-}
-
-@media (max-width: 600px) { /* Adjust for very small screens */
-  .chart-section, .dashboard-chart-item {
-    flex: 1 1 100%; /* 1 per row */
-    max-width: 100%;
+/* En pantallas más pequeñas, todo se apilará en una columna */
+@media (max-width: 768px) {
+  .all-charts-container,
+  .dashboard-charts-container {
+    grid-template-columns: 1fr;
   }
 }

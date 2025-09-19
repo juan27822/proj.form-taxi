@@ -5,8 +5,23 @@ import Dashboard from './Dashboard';
 import PhoneOriginChart from './charts/PhoneOriginChart';
 import RoundtripOnewayChart from './charts/RoundtripOnewayChart';
 import BookingsByPeriodChart from './charts/BookingsByPeriodChart';
-import BookingsByHourChart from './charts/BookingsByHourChart'; // New import
-import styles from './ChartsPage.module.css';
+import BookingsByHourChart from './charts/BookingsByHourChart';
+
+const containerStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, 1fr)',
+  gap: '20px',
+  width: '90%',
+  margin: '20px auto',
+};
+
+const itemStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '15px',
+  border: '1px solid #ccc',
+  borderRadius: '8px',
+  boxSizing: 'border-box',
+};
 
 const ChartsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -16,7 +31,7 @@ const ChartsPage: React.FC = () => {
     phoneOriginData,
     roundtripOnewayData,
     bookingsByPeriodData,
-    bookingsByHourData, // New data from store
+    bookingsByHourData,
     loading,
     error,
     fetchChartData,
@@ -27,27 +42,26 @@ const ChartsPage: React.FC = () => {
   }, [period, fetchChartData]);
 
   if (loading) {
-    return <div className={styles.chartsPage}><h1>{t('charts_title')}</h1><p>{t('loading')}...</p></div>;
+    return <div style={{ padding: '20px' }}><h1>{t('charts_title')}</h1><p>{t('loading')}...</p></div>;
   }
 
   if (error) {
-    return <div className={styles.chartsPage}><h1>{t('charts_title')}</h1><p>{t('error_fetching_data')}: {error}</p></div>;
+    return <div style={{ padding: '20px' }}><h1>{t('charts_title')}</h1><p>{t('error_fetching_data')}: {error}</p></div>;
   }
 
   return (
-    <div className={styles.chartsPage}>
+    <div style={{ padding: '20px' }}>
       <h1>{t('charts_title')}</h1>
 
-      <div className={styles.allChartsContainer}>
-        <PhoneOriginChart data={phoneOriginData} className={styles.chartSection} />
-        <RoundtripOnewayChart data={roundtripOnewayData.map(item => ({ name: item.type, value: item.count }))} className={styles.chartSection} />
-        <BookingsByPeriodChart 
+      <div style={containerStyle}>
+        <div style={itemStyle}><PhoneOriginChart data={phoneOriginData} /></div>
+        <div style={itemStyle}><RoundtripOnewayChart data={roundtripOnewayData.map(item => ({ name: item.type, value: item.count }))} /></div>
+        <div style={itemStyle}><BookingsByPeriodChart 
           data={bookingsByPeriodData} 
           period={period} 
           setPeriod={setPeriod} 
-          className={styles.chartSection} 
-        />
-        <BookingsByHourChart data={bookingsByHourData} className={styles.chartSection} /> {/* New chart */}
+        /></div>
+        <div style={itemStyle}><BookingsByHourChart data={bookingsByHourData} /></div>
       </div>
 
       <div>
