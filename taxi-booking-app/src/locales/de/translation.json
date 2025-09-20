@@ -35,6 +35,7 @@
   "original_booking_id_label": "Original Buchungs-ID",
   "original_booking_id_placeholder": "z.B. 1678901234567",
   "submit_button": "Buchung absenden",
+  "submitting_button": "Wird gesendet...",
   "booking_success_message": "Buchung erfolgreich! Wir werden Sie in Kürze zur Bestätigung kontaktieren.",
   "booking_error_message": "Bei der Übermittlung Ihrer Buchung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
   "no_bookings_yet": "Noch keine Buchungen.",

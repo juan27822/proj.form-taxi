@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createBooking } from '../api';
 import { Booking } from '../types';
@@ -14,6 +14,16 @@ const BookingForm: React.FC = () => {
   });
   const [showReturn, setShowReturn] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', message: string} | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (statusMessage) {
+      const timer = setTimeout(() => {
+        setStatusMessage(null);
+      }, 5000); // El mensaje desaparece después de 5 segundos
+      return () => clearTimeout(timer);
+    }
+  }, [statusMessage]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -37,6 +47,7 @@ const BookingForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatusMessage(null);
+    setIsSubmitting(true);
     try {
       const dataToSend = {
         ...formData,
@@ -52,6 +63,8 @@ const BookingForm: React.FC = () => {
         } else {
             setStatusMessage({ type: 'error', message: t('booking_error_message') });
         }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -197,7 +210,9 @@ const BookingForm: React.FC = () => {
       )}
 
       <div className="submit-container">
-        <button type="submit" className="submit-btn">{t('submit_button')}</button>
+        <button type="submit" className="submit-btn" disabled={isSubmitting}>
+          {isSubmitting ? t('submitting_button') : t('submit_button')}
+        </button>
         {statusMessage && 
           <div className={`status-message ${statusMessage.type}`}>
             {statusMessage.message}

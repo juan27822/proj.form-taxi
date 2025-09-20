@@ -35,6 +35,7 @@
   "original_booking_id_label": "ID de Reserva Original",
   "original_booking_id_placeholder": "Ej., 1678901234567",
   "submit_button": "Enviar Reserva",
+  "submitting_button": "Enviando...",
   "booking_success_message": "¡Reserva realizada con éxito! Nos pondremos en contacto contigo en breve para confirmar.",
   "booking_error_message": "Hubo un error al enviar tu reserva. Por favor, inténtalo de nuevo más tarde.",
   "no_bookings_yet": "Aún no hay reservas.",

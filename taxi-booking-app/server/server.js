@@ -13,6 +13,7 @@ const { setSocketIO, setTranslator } = require('./controllers/booking.controller
 const bookingRoutes = require('./routes/booking.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const driverRoutes = require('./routes/driver.routes');
+const aiRoutes = require('./routes/ai.routes');
 const { validateUser } = require('./middleware');
 
 const prisma = new PrismaClient();
@@ -131,6 +132,7 @@ app.post('/api/login', validateUser, async (req, res) => {
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/drivers', driverRoutes);
+app.use('/api/ai', aiRoutes);
 
 
 httpServer.listen(PORT, () => {
