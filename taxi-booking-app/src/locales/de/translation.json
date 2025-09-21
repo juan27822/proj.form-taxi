@@ -138,5 +138,7 @@
   "assign_driver_label": "Fahrer zuweisen",
   "no_driver_option": "Kein Fahrer",
   "driver_col": "Fahrer",
-  "delete_btn": "Löschen"
+  "delete_btn": "Löschen",
+  "confirm_booking_title": "Buchung bestätigen",
+  "cancel_booking_title": "Buchung stornieren"
 }

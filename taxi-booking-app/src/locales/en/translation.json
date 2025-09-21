@@ -167,5 +167,7 @@
   "bookings_count": "Bookings Count",
   "daily": "Daily",
   "weekly": "Weekly",
-  "monthly": "Monthly"
+  "monthly": "Monthly",
+  "confirm_booking_title": "Confirm Booking",
+  "cancel_booking_title": "Cancel Booking"
 }

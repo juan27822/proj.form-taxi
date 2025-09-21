@@ -185,5 +185,7 @@
   "additional_info_label": "Información Adicional",
   "isModification_label": "¿Es una modificación?",
   "originalBookingId_label": "ID de Reserva Original",
-  "lang_label": "Idioma"
+  "lang_label": "Idioma",
+  "confirm_booking_title": "Confirmar Reserva",
+  "cancel_booking_title": "Cancelar Reserva"
 }

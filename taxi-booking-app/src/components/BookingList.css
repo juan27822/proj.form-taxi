@@ -174,3 +174,26 @@
   gap: 10px;
   margin-top: 20px;
 }
+
+/* Notification styles */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  z-index: 1050; /* High z-index to appear above other elements */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.notification-success {
+  background-color: #28a745; /* Green for success */
+}
+
+.notification-error {
+  background-color: #dc3545; /* Red for error */
+}
