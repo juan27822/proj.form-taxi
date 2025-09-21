@@ -8,8 +8,9 @@ const { Server } = require('socket.io');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const webpush = require('web-push');
 
-const { setSocketIO, setTranslator } = require('./controllers/booking.controller');
+const { setSocketIO, setTranslator, setNotificationSender } = require('./controllers/booking.controller');
 const bookingRoutes = require('./routes/booking.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const driverRoutes = require('./routes/driver.routes');
@@ -19,6 +20,18 @@ const { validateUser } = require('./middleware');
 const prisma = new PrismaClient();
 const app = express();
 const PORT = 3001;
+
+// --- VAPID Configuration ---
+const vapidKeys = {
+  publicKey: process.env.VAPID_PUBLIC_KEY,
+  privateKey: process.env.VAPID_PRIVATE_KEY,
+};
+
+webpush.setVapidDetails(
+  'mailto:juan.nadal.ferrer@gmail.com',
+  vapidKeys.publicKey,
+  vapidKeys.privateKey
+);
 
 // --- Internationalization Setup ---
 const loadTranslations = () => {
@@ -89,12 +102,31 @@ io.on('connection', (socket) => {
   });
 });
 
-// Pass io and t to the controller
+// --- Push Notification Setup ---
+let subscriptions = []; 
+
+const sendNotification = (payload) => {
+  subscriptions.forEach(subscription => {
+    webpush.sendNotification(subscription, JSON.stringify(payload))
+      .catch(error => console.error('Error sending notification:', error));
+  });
+};
+
+// Pass dependencies to the controller
 setSocketIO(io);
 setTranslator(t);
+setNotificationSender(sendNotification);
 // ------------------------
 
 // --- API Routes ---
+
+// Subscription route
+app.post('/api/subscribe', (req, res) => {
+  const subscription = req.body;
+  subscriptions.push(subscription);
+  res.status(201).json({ message: 'Subscription successful' });
+});
+
 
 // Auth routes
 app.post('/api/register', validateUser, async (req, res) => {

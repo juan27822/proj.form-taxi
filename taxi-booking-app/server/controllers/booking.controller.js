@@ -13,6 +13,7 @@ const transporter = nodemailer.createTransport({
 
 let io;
 let t;
+let sendNotification;
 
 const setSocketIO = (socketIO) => {
     io = socketIO;
@@ -20,6 +21,10 @@ const setSocketIO = (socketIO) => {
 
 const setTranslator = (translator) => {
     t = translator;
+};
+
+const setNotificationSender = (sender) => {
+    sendNotification = sender;
 };
 
 const getAllBookings = async (req, res) => {
@@ -133,6 +138,16 @@ const createBooking = async (req, res) => {
             data: { ...req.body, id: customId }
         });
         io.emit('newBooking', newBooking); // Notify all connected clients
+
+        // Send push notification
+        if (sendNotification) {
+            const payload = {
+                title: 'New Booking Created',
+                body: `Booking #${newBooking.id} has been created.`,
+            };
+            sendNotification(payload);
+        }
+
         res.status(201).json(newBooking);
     } catch (error) {
         console.error("Error creating booking:", error);
@@ -149,6 +164,15 @@ const confirmBooking = async (req, res) => {
         });
 
         const lang = booking.lang || 'es'; // Default to Spanish
+
+        // Send push notification
+        if (sendNotification) {
+            const payload = {
+                title: 'Booking Confirmed',
+                body: `Booking #${booking.id} has been confirmed.`,
+            };
+            sendNotification(payload);
+        }
 
         // Send confirmation email
         const details = {
@@ -227,6 +251,15 @@ const cancelBooking = async (req, res) => {
             data: { status: 'cancelled' }
         });
 
+        // Send push notification
+        if (sendNotification) {
+            const payload = {
+                title: 'Booking Cancelled',
+                body: `Booking #${booking.id} has been cancelled.`,
+            };
+            sendNotification(payload);
+        }
+
         res.json({ message: 'Booking cancelled', booking });
     } catch (error) {
         console.error("Error cancelling booking:", error);
@@ -260,6 +293,15 @@ const updateBooking = async (req, res) => {
         });
 
         const lang = updatedBooking.lang || 'es';
+
+        // Send push notification
+        if (sendNotification) {
+            const payload = {
+                title: 'Booking Updated',
+                body: `Booking #${updatedBooking.id} has been updated.`,
+            };
+            sendNotification(payload);
+        }
 
         // --- 3. Compare and build the HTML for the email ---
         const bookingFieldLabels = {
@@ -382,6 +424,7 @@ const requestInfo = async (req, res) => {
 module.exports = {
     setSocketIO,
     setTranslator,
+    setNotificationSender,
     getAllBookings,
     getBookingStatusById,
     searchBookings,
