@@ -5,10 +5,10 @@ import BookingList from '../components/BookingList';
 import LoginForm from '../components/LoginForm';
 import SearchForm from '../components/SearchForm';
 import Dashboard from '../components/Dashboard'; // Import Dashboard
-
 import { useBookingStore } from '../store';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import './AdminPage.css'; // Import the new CSS file
 
 const AdminPage: React.FC = () => {
   const { t } = useTranslation();
@@ -130,15 +130,15 @@ const AdminPage: React.FC = () => {
   }
 
   return (
-    <div style={{padding: '20px'}}>
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+    <div className="admin-container">
+      <header className="admin-header">
         <h1>{t('admin_dashboard_title')}</h1>
-        <div>
-          <button onClick={() => navigate('/charts')} style={{padding: '10px 20px', fontSize: '16px', backgroundColor: 'var(--primary-blue)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', marginRight: '10px'}}>{t('charts_btn')}</button>
-          <button onClick={exportToCsv} style={{padding: '10px 20px', fontSize: '16px', backgroundColor: 'var(--primary-blue)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', marginRight: '10px'}}>{t('export_csv_btn')}</button>
-          <button onClick={handleLogout} style={{padding: '10px 20px', fontSize: '16px', backgroundColor: 'var(--primary-blue)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer'}}>{t('logout_btn')}</button>
+        <div className="admin-header-actions">
+          <button onClick={() => navigate('/charts')}>{t('charts_btn')}</button>
+          <button onClick={exportToCsv}>{t('export_csv_btn')}</button>
+          <button onClick={handleLogout}>{t('logout_btn')}</button>
         </div>
-      </div>
+      </header>
 
       <Dashboard />
 
@@ -147,17 +147,17 @@ const AdminPage: React.FC = () => {
       <SearchForm onSearch={handleSearch} onClear={handleClearSearch} />
       <BookingList bookings={bookings} onUpdate={() => fetchBookings(page, currentPageSize)} />
 
-      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <button onClick={handlePrevPage} disabled={page <= 1} style={{ padding: '8px 16px', margin: '0 5px', cursor: 'pointer' }}>
+      <div className="pagination-controls">
+        <button onClick={handlePrevPage} disabled={page <= 1}>
           {t('previous_btn')}
         </button>
         <span>
           {t('page_indicator', { page, totalPages })}
         </span>
-        <button onClick={handleNextPage} disabled={page >= totalPages} style={{ padding: '8px 16px', margin: '0 5px', cursor: 'pointer' }}>
+        <button onClick={handleNextPage} disabled={page >= totalPages}>
           {t('next_btn')}
         </button>
-        <select value={currentPageSize} onChange={handlePageSizeChange} style={{ marginLeft: '20px', padding: '8px' }}>
+        <select value={currentPageSize} onChange={handlePageSizeChange}>
           <option value={10}>10</option>
           <option value={20}>20</option>
           <option value={50}>50</option>

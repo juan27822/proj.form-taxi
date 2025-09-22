@@ -123,8 +123,9 @@ const BookingList: React.FC<BookingListProps> = ({ bookings, onUpdate }) => {
           {notification.message}
         </div>
       )}
-      <div className="booking-list">
-        <table>
+      <div className="booking-list-container">
+        <div className="booking-list">
+          <table>
           <thead>
             <tr>
               <th>{t('booking_id_col')}</th>

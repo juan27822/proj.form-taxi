@@ -1,16 +1,22 @@
 .main-content {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column; /* Stacks items vertically by default */
   gap: 2rem;
   padding: 1rem;
 }
 
 .booking-form-container {
-  flex: 2;
-  min-width: 300px;
+  flex: 2; /* Takes more space when horizontal */
 }
 
 .services-info-container-wrapper {
-  flex: 1;
-  min-width: 300px;
+  flex: 1; /* Takes less space when horizontal */
+}
+
+/* Media query for tablets and desktops */
+@media (min-width: 768px) {
+  .main-content {
+    flex-direction: row; /* Side-by-side on larger screens */
+    align-items: flex-start; /* Align items to the top */
+  }
 }

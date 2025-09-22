@@ -1,11 +1,17 @@
+/* Make the container scrollable on x-axis */
+.booking-list-container {
+  overflow-x: auto;
+  margin-top: 1.25rem;
+}
+
 .booking-list table {
   width: 100%;
+  min-width: 900px; /* Force scroll on smaller screens */
   border-collapse: collapse;
-  margin-top: 20px;
 }
 
 .booking-list th, .booking-list td {
-  padding: 12px 15px;
+  padding: 0.75rem 1rem;
   text-align: left;
   border-bottom: 1px solid #ddd;
   vertical-align: middle;
@@ -27,121 +33,96 @@
 
 /* Status-specific row styles */
 .booking-list tr.status-cancelled {
-  background-color: #ffebee !important; /* Light red */
-  color: #c62828; /* Darker red text for contrast */
+  background-color: #ffebee !important;
+  color: #c62828;
 }
 
 .booking-list tr.status-cancelled:hover {
-  background-color: #ffcdd2 !important; /* Slightly darker red on hover */
+  background-color: #ffcdd2 !important;
 }
 
 .booking-list tr.status-confirmed {
-  background-color: #e8f5e9 !important; /* Light green */
+  background-color: #e8f5e9 !important;
 }
 
 .booking-list tr.status-confirmed:hover {
-  background-color: #c8e6c9 !important; /* Slightly darker green on hover */
+  background-color: #c8e6c9 !important;
 }
 
 .booking-list tr.booking-amber {
-    background-color: #fff3cd !important; /* Light amber */
-    color: #856404; /* Darker text for contrast */
+    background-color: #fff3cd !important;
+    color: #856404;
 }
 
 .booking-list tr.booking-amber:hover {
-    background-color: #ffeeba !important; /* Slightly darker amber on hover */
+    background-color: #ffeeba !important;
 }
 
-/* Style for past bookings - this takes priority */
 .booking-list tr.past-booking {
-    background-color: #e9ecef !important; /* A neutral grey */
+    background-color: #e9ecef !important;
     color: #6c757d !important;
 }
 
 .booking-list tr.past-booking:hover {
-    background-color: #dee2e6 !important; /* Darken the grey on hover */
+    background-color: #dee2e6 !important;
 }
 
 /* Status label styles */
 .status-label {
-  padding: 3px 8px;
-  border-radius: 12px;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.75rem;
   font-weight: bold;
   color: white;
   text-transform: capitalize;
   font-size: 0.9em;
+  white-space: nowrap; /* Prevent wrapping */
 }
 
-.status-label-pending {
-  background-color: #ffc107; /* Amber */
-}
-
-.status-label-confirmed {
-  background-color: #4caf50; /* Green */
-}
-
-.status-label-cancelled {
-  background-color: #f44336; /* Red */
-  color: white;
-}
+.status-label-pending { background-color: #ffc107; }
+.status-label-confirmed { background-color: #4caf50; }
+.status-label-cancelled { background-color: #f44336; color: white; }
 
 /* Action button styles */
 .actions-cell {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 5px;
+  grid-template-columns: 1fr; /* Single column for mobile */
+  gap: 0.3rem;
+}
+
+/* Use a media query to switch to two columns on larger screens */
+@media (min-width: 768px) {
+  .actions-cell {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .action-button {
-  padding: 3px 8px;
+  padding: 0.4rem 0.6rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   color: white;
   cursor: pointer;
-  font-size: 0.8em;
+  font-size: 0.85em;
   transition: background-color 0.2s ease;
+  text-align: center;
 }
 
-.action-button.confirm {
-  background-color: #28a745; /* Green */
-}
-.action-button.confirm:hover {
-  background-color: #218838;
-}
-
-.action-button.cancel {
-  background-color: #dc3545; /* Red */
-}
-.action-button.cancel:hover {
-  background-color: #c82333;
-}
-
-.action-button.pdf {
-  background-color: #007bff; /* Blue */
-}
-.action-button.pdf:hover {
-  background-color: #0069d9;
-}
-
-.action-button.edit {
-  background-color: #17a2b8; /* Info blue */
-}
-.action-button.edit:hover {
-  background-color: #138496;
-}
-
-.action-button.contact {
-  background-color: #fd7e14; /* Orange */
-}
-.action-button.contact:hover {
-  background-color: #e86a02;
-}
+.action-button.confirm { background-color: #28a745; }
+.action-button.confirm:hover { background-color: #218838; }
+.action-button.cancel { background-color: #dc3545; }
+.action-button.cancel:hover { background-color: #c82333; }
+.action-button.pdf { background-color: #007bff; }
+.action-button.pdf:hover { background-color: #0069d9; }
+.action-button.edit { background-color: #17a2b8; }
+.action-button.edit:hover { background-color: #138496; }
+.action-button.contact { background-color: #fd7e14; }
+.action-button.contact:hover { background-color: #e86a02; }
 
 .booking-list p {
     text-align: center;
     font-style: italic;
     color: #6c757d;
-    margin-top: 20px;
+    margin-top: 1.25rem;
 }
 
 /* Modal styles */
@@ -155,14 +136,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 1rem;
+  z-index: 1000;
 }
 
 .modal-content {
   background: white;
-  padding: 20px;
-  border-radius: 5px;
-  width: 80%;
+  padding: 1.5rem;
+  border-radius: 0.3rem;
+  width: 95%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
@@ -171,29 +153,32 @@
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
 }
 
 /* Notification styles */
 .notification {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 15px 20px;
-  border-radius: 8px;
+  top: 1rem;
+  right: 1rem;
+  left: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
   color: #fff;
   font-size: 1rem;
-  z-index: 1050; /* High z-index to appear above other elements */
+  z-index: 1050;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   opacity: 1;
   transition: opacity 0.5s ease-in-out;
 }
 
-.notification-success {
-  background-color: #28a745; /* Green for success */
+@media (min-width: 576px) {
+  .notification {
+    left: auto; /* Revert to only being on the right for larger screens */
+    max-width: 350px;
+  }
 }
 
-.notification-error {
-  background-color: #dc3545; /* Red for error */
-}
+.notification-success { background-color: #28a745; }
+.notification-error { background-color: #dc3545; }
