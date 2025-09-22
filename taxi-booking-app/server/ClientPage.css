@@ -1,0 +1,17 @@
+/* src/pages/ClientPage.css */
+
+.client-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Para pantallas más grandes (tablets y escritorio) */
+@media (min-width: 768px) {
+  .client-page {
+    padding: 2rem;
+  }
+}

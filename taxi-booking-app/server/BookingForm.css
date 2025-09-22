@@ -1,0 +1,51 @@
+/* src/components/BookingForm.css */
+
+/* Estilos base para móviles (Mobile-First) */
+.booking-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.booking-form label {
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.booking-form input,
+.booking-form select,
+.booking-form button {
+  padding: 0.8rem; /* Aumenta el padding para uso táctil */
+  font-size: 1rem; /* Tamaño de fuente legible */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.booking-form button {
+  background-color: var(--primary-color, #007bff);
+  color: white;
+  cursor: pointer;
+  border: none;
+  font-size: 1.1rem;
+}
+
+/* Estilos para tablets y escritorio */
+@media (min-width: 768px) {
+  .booking-form {
+    max-width: 700px; /* Ancho máximo en pantallas grandes */
+    padding: 2rem;
+  }
+}

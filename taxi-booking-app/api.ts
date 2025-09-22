@@ -1,7 +1,10 @@
 import axios from 'axios';
 import { Booking } from './types'; // Asumiendo que types.ts define la interfaz Booking
 
-const API_BASE_URL = 'http://localhost:3001/api';
+// Usar variables de entorno para la URL de la API.
+// En desarrollo, esto será '/api' para usar el proxy de Vite.
+// En producción, se configurará una variable de entorno en el servicio de hosting (Vercel, Netlify, etc.).
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'; // El valor por defecto '/api' usará el proxy de Vite
 
 axios.interceptors.request.use(
   (config) => {

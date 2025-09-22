@@ -40,6 +40,16 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: ['.ngrok-free.app'],
+    proxy: {
+      // Redirige las peticiones de /api al servidor de backend
+      '/api': {
+        // Usa una variable de entorno para el target del proxy.
+        // Si no está definida, usa localhost (para desarrollo normal en el PC).
+        target: process.env.VITE_PROXY_TARGET || 'http://localhost:3001',
+        changeOrigin: true, // Necesario para vhosts
+        secure: false,      // No verificar cert SSL si usas https en dev
+      },
+    },
   },
   build: {
     rollupOptions: {
@@ -51,5 +61,10 @@ export default defineConfig({
         },
       },
     },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
   },
 });

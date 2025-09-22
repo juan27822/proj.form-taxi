@@ -272,20 +272,44 @@ const updateBooking = async (req, res) => {
         // --- 1. Get the original booking before updating ---
         const originalBooking = await prisma.booking.findUnique({
             where: { id: req.params.id },
+            include: { driver: true }, // Also include driver here
         });
 
         if (!originalBooking) {
             return res.status(404).json({ message: "Booking not found" });
         }
 
-        // --- 2. Update the booking ---
-        const { driverId, ...otherData } = req.body;
+        // --- 2. Sanitize and prepare the update data ---
+        const {
+            name, phone, email, people, hasMinors, minorsAge, needsBabySeat,
+            needsBooster, luggageType, arrival_date, arrival_time,
+            arrival_flight_number, destination, return_date, return_time,
+            return_flight_time, return_pickup_address, return_flight_number,
+            additional_info, isModification, originalBookingId, driverId
+        } = req.body;
+
+        const parsedPeople = parseInt(people, 10);
+
         const updatedBookingData = {
-            ...otherData,
-            people: parseInt(req.body.people, 10),
-            driverId: driverId === '' ? null : driverId, // Disconnect if empty string
+            name, phone, email,
+            people: isNaN(parsedPeople) ? undefined : parsedPeople,
+            hasMinors, minorsAge, needsBabySeat, needsBooster, luggageType,
+            arrival_date, arrival_time, arrival_flight_number, destination,
+            return_date, return_time, return_flight_time, return_pickup_address,
+            return_flight_number, additional_info, isModification,
+            originalBookingId,
+            lang: req.body.lang, // Get lang directly from body
+            driverId: driverId === '' ? null : driverId,
         };
 
+        // Remove undefined fields to avoid overwriting with null
+        Object.keys(updatedBookingData).forEach(key => {
+            if (updatedBookingData[key] === undefined) {
+                delete updatedBookingData[key];
+            }
+        });
+
+        // --- 3. Update the booking ---
         const updatedBooking = await prisma.booking.update({
             where: { id: req.params.id },
             data: updatedBookingData,
@@ -303,7 +327,7 @@ const updateBooking = async (req, res) => {
             sendNotification(payload);
         }
 
-        // --- 3. Compare and build the HTML for the email ---
+        // --- 4. Compare and build the HTML for the email ---
         const bookingFieldLabels = {
             name: t(lang, 'name_label'),
             phone: t(lang, 'phone_label'),
@@ -324,15 +348,32 @@ const updateBooking = async (req, res) => {
             return_pickup_address: t(lang, 'return_pickup_label'),
             return_flight_number: t(lang, 'return_flight_label'),
             additional_info: t(lang, 'additional_info'),
+            driverId: t(lang, 'driver_name_label'), // Add driver
         };
 
         let detailsHtml = '<ul>';
         for (const key of Object.keys(bookingFieldLabels)) {
             const originalValue = originalBooking[key];
-            const updatedValue = updatedBooking[key];
+            let updatedValue = updatedBooking[key];
             const label = bookingFieldLabels[key];
 
-            // Normalize boolean values to 'yes'/'no' for comparison and display
+            // Special handling for driver
+            if (key === 'driverId') {
+                const originalDriver = originalBooking.driver;
+                const updatedDriver = updatedBooking.driver;
+
+                const originalDriverName = originalDriver ? originalDriver.name : 'N/A';
+                const updatedDriverName = updatedDriver ? updatedDriver.name : 'N/A';
+
+                if (originalDriverName !== updatedDriverName) {
+                    detailsHtml += `<li style="background-color: #ffecb3;"><b>${label}:</b> ${updatedDriverName} (<i>${t(lang, 'previously')}: ${originalDriverName}</i>)</li>`;
+                } else {
+                    detailsHtml += `<li><b>${label}:</b> ${updatedDriverName}</li>`;
+                }
+                continue; // Skip to next iteration
+            }
+
+
             const formatValue = (val) => {
                 if (typeof val === 'boolean') return val ? t(lang, 'yes') : t(lang, 'no');
                 return val || 'N/A';
@@ -342,16 +383,19 @@ const updateBooking = async (req, res) => {
             const updatedFormatted = formatValue(updatedValue);
 
             if (String(originalValue) !== String(updatedValue)) {
-                // If changed, highlight it
                 detailsHtml += `<li style="background-color: #ffecb3;"><b>${label}:</b> ${updatedFormatted} (<i>${t(lang, 'previously')}: ${originalFormatted}</i>)</li>`;
             } else {
-                // If not changed, display normally
                 detailsHtml += `<li><b>${label}:</b> ${updatedFormatted}</li>`;
             }
         }
+         // Add driver phone if driver is assigned
+        if (updatedBooking.driver) {
+            detailsHtml += `<li><b>${t(lang, 'driver_phone_label')}:</b> ${updatedBooking.driver.phone}</li>`;
+        }
+
         detailsHtml += '</ul>';
 
-        // --- 4. Send the email with the highlighted changes ---
+        // --- 5. Send the email with the highlighted changes ---
         const emailHtml = `
           <h1>${t(lang, 'email_update_title')}</h1>
           <p>${t(lang, 'email_greeting', { name: updatedBooking.name })}</p>
