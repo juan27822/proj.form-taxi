@@ -187,6 +187,7 @@ const BookingList: React.FC<BookingListProps> = ({ bookings, onUpdate }) => {
             ))}
           </tbody>
         </table>
+      </div>
 
         {editingBooking && (
           <EditBookingModal

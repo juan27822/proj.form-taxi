@@ -35,7 +35,7 @@ webpush.setVapidDetails(
 
 // --- Internationalization Setup ---
 const loadTranslations = () => {
-  const localesDir = path.join(__dirname, '../../taxi/taxi-booking-app/src/locales');
+  const localesDir = path.join(__dirname, '../src/locales');
   const translations = {};
   try {
     const languages = require('fs').readdirSync(localesDir);
@@ -67,22 +67,22 @@ const t = (lang, key, replacements = {}) => {
 
 // Middleware
 const corsOptions = {
-  origin: 'http://localhost:5173', // Allow only the frontend to connect
+  // Permitir localhost y cualquier subdominio de ngrok
+  origin: [
+    'http://localhost:5173', 
+    /https:\/\/.+\.ngrok-free\.app/ 
+  ],
   optionsSuccessStatus: 200
 };
+
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // Override restrictive CSP headers
 app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", 
-    "default-src 'self' http://localhost:5173; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173; " +
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com; " +
-    "font-src 'self' https://fonts.gstatic.com; " +
-    "connect-src 'self' ws://localhost:5173 http://localhost:3001; " +
-    "img-src 'self' data:;");
+  // Una política más permisiva para el desarrollo con ngrok
+  res.setHeader("Content-Security-Policy", "connect-src 'self' *;");
   next();
 });
 
@@ -90,7 +90,7 @@ app.use((req, res, next) => {
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173", // Your frontend URL
+    origin: "*", // Simplificamos para desarrollo
     methods: ["GET", "POST"]
   }
 });
@@ -165,7 +165,6 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/ai', aiRoutes);
-
 
 httpServer.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
