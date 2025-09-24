@@ -16,6 +16,7 @@
     "express": "^4.19.2",
     "joi": "^18.0.1",
     "jsonwebtoken": "^9.0.2",
+    "nanoid": "^5.1.6",
     "node-cron": "^3.0.0",
     "nodemailer": "^7.0.6",
     "pino": "^9.9.4",

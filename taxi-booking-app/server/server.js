@@ -67,10 +67,12 @@ const t = (lang, key, replacements = {}) => {
 
 // Middleware
 const corsOptions = {
-  // Permitir localhost y cualquier subdominio de ngrok
+  // Permitir localhost, IPs de red local y cualquier subdominio de ngrok
   origin: [
-    'http://localhost:5173', 
-    /https:\/\/.+\.ngrok-free\.app/ 
+    'http://localhost:5173',
+    'http://192.168.1.69:5173', // IP específica del móvil
+    /^http:\/\/192\.168\.\d+\.\d+:5173$/,
+    /https:\/\/.+\.ngrok-free\.app/
   ],
   optionsSuccessStatus: 200
 };
@@ -147,17 +149,17 @@ app.post('/api/register', validateUser, async (req, res) => {
 app.post('/api/login', validateUser, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { username: req.body.username } });
     if (user == null) {
-        return res.status(400).send('Cannot find user');
+        return res.status(400).json({ message: 'Cannot find user' });
     }
     try {
         if (await bcrypt.compare(req.body.password, user.password)) {
-            const accessToken = jwt.sign({ username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            const accessToken = jwt.sign({ username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
             res.json({ accessToken: accessToken });
         } else {
-            res.send('Not Allowed');
+            res.status(401).json({ message: 'Invalid credentials' });
         }
-    } catch {
-        res.status(500).send();
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 

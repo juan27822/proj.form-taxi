@@ -14,7 +14,7 @@ const AdminPage: React.FC = () => {
   const { t } = useTranslation();
   const { bookings, page, totalPages, pageSize, fetchBookings, searchBookings, addBooking } = useBookingStore();
   const [alarmSound, setAlarmSound] = useState<HTMLAudioElement | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token_v2'));
   const [currentPageSize, setCurrentPageSize] = useState(pageSize);
   const navigate = useNavigate(); // Initialize useNavigate
 
@@ -34,7 +34,8 @@ const AdminPage: React.FC = () => {
   useEffect(() => {
     if (!token) return;
 
-    const socket = io('http://localhost:3001');
+    const socketURL = `http://${window.location.hostname}:3001`;
+    const socket = io(socketURL);
 
     socket.on('connect', () => {
       console.log('Connected to socket server');
@@ -62,12 +63,14 @@ const AdminPage: React.FC = () => {
   }, [token, alarmSound, t, addBooking]); // Dependencies are stable or managed
 
   const handleLogin = (newToken: string) => {
-    localStorage.setItem('token', newToken);
-    setToken( newToken);
+    if (newToken) {
+      localStorage.setItem('token_v2', newToken);
+      setToken(newToken);
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('token_v2');
     setToken(null);
   };
 

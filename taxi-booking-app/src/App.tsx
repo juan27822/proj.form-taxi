@@ -25,7 +25,7 @@ const App: React.FC = () => {
                     })
                     .then(newSubscription => {
                       console.log('New subscription', newSubscription);
-                      fetch('http://localhost:3001/api/subscribe', {
+                      fetch('/api/subscribe', {
                         method: 'POST',
                         body: JSON.stringify(newSubscription),
                         headers: {

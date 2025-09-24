@@ -2,11 +2,11 @@ import axios from 'axios';
 import { Credentials, UserData, SearchParams, Booking } from './types';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api',
+  baseURL: '/api',
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token_v2');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -18,7 +18,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 403 && error.response.data.message === 'jwt expired') {
       // Token expired, log out user
-      localStorage.removeItem('token');
+      localStorage.removeItem('token_v2');
       window.location.href = '/login'; // Redirect to login page
     }
     return Promise.reject(error);
@@ -28,7 +28,7 @@ api.interceptors.response.use(
 export const login = async (credentials: Credentials) => {
   const response = await api.post('/login', credentials);
   if (response.data.accessToken) {
-    localStorage.setItem('token', response.data.accessToken);
+    localStorage.setItem('token_v2', response.data.accessToken);
   }
   return response.data;
 };

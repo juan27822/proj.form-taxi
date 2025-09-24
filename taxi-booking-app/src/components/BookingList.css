@@ -6,7 +6,6 @@
 
 .booking-list table {
   width: 100%;
-  min-width: 900px; /* Force scroll on smaller screens */
   border-collapse: collapse;
 }
 
@@ -177,6 +176,52 @@
   .notification {
     left: auto; /* Revert to only being on the right for larger screens */
     max-width: 350px;
+  }
+}
+
+/* Responsive Card View for Mobile */
+@media (max-width: 768px) {
+  .booking-list table {
+    min-width: 100%; /* Remove forced scroll */
+  }
+
+  .booking-list thead {
+    display: none; /* Hide table headers */
+  }
+
+  .booking-list tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .booking-list td {
+    display: block;
+    text-align: right;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  .booking-list td:last-child {
+    border-bottom: 0;
+  }
+
+  .booking-list td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0.75rem;
+    width: 45%;
+    padding-right: 0.75rem;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+  }
+
+  .actions-cell {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   }
 }
 

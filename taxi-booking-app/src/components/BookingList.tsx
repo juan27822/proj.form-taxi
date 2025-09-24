@@ -144,14 +144,14 @@ const BookingList: React.FC<BookingListProps> = ({ bookings, onUpdate }) => {
           <tbody>
             {bookings.map((booking) => (
               <tr key={booking.id} className={getRowClass(booking)}>
-                <td>{booking.id}</td>
-                <td>{new Date(booking.receivedAt).toLocaleString()}</td>
-                <td><span className={`status-label status-label-${booking.status}`}>{t(booking.status)}</span></td>
-                <td>{booking.driver ? booking.driver.name : t('n_a')}</td>
-                <td>{booking.name} ({booking.people}p)</td>
-                <td>{booking.phone}<br />{booking.email}</td>
-                <td>{booking.arrival_date} {booking.arrival_time}<br />{booking.arrival_flight_number}<br />{booking.destination}</td>
-                <td>
+                <td data-label={t('booking_id_col')}>{booking.id}</td>
+                <td data-label={t('received_at_col')}>{new Date(booking.receivedAt).toLocaleString()}</td>
+                <td data-label={t('status_col')}><span className={`status-label status-label-${booking.status}`}>{t(booking.status)}</span></td>
+                <td data-label={t('driver_col')}>{booking.driver ? booking.driver.name : t('n_a')}</td>
+                <td data-label={t('customer_col')}>{booking.name} ({booking.people}p)</td>
+                <td data-label={t('contact_col')}>{booking.phone}<br />{booking.email}</td>
+                <td data-label={t('arrival_col')}>{booking.arrival_date} {booking.arrival_time}<br />{booking.arrival_flight_number}<br />{booking.destination}</td>
+                <td data-label={t('return_col')}>
                   {booking.return_date ? (
                     <>
                       {`${booking.return_date} ${booking.return_time}`}
@@ -161,14 +161,14 @@ const BookingList: React.FC<BookingListProps> = ({ bookings, onUpdate }) => {
                     t('n_a')
                   )}
                 </td>
-                <td>
+                <td data-label={t('minors_luggage_col')}>
                   {booking.hasMinors && `M: ${booking.minorsAge || 'N/A'}`}<br />
                   {booking.needsBabySeat && `BS: ${t('yes')}`}<br />
                   {booking.needsBooster && `B: ${t('yes')}`}<br />
                   {booking.luggageType && `L: ${booking.luggageType}`}
                 </td>
-                <td>{booking.isModification ? `${t('yes')} (${booking.originalBookingId || 'N/A'})` : t('no')}</td>
-                <td className="actions-cell">
+                <td data-label={t('modification_col')}>{booking.isModification ? `${t('yes')} (${booking.originalBookingId || 'N/A'})` : t('no')}</td>
+                <td className="actions-cell" data-label={t('actions_col')}>
                   <button className="action-button edit" onClick={() => setEditingBooking(booking)}>{t('edit_btn')}</button>
                   <button className="action-button contact" onClick={() => setContactingBooking(booking)}>{t('contact_client_btn')}</button>
                   {booking.status === 'pending' && (
