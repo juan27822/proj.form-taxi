@@ -140,5 +140,12 @@
   "driver_col": "Fahrer",
   "delete_btn": "Löschen",
   "confirm_booking_title": "Buchung bestätigen",
-  "cancel_booking_title": "Buchung stornieren"
+  "cancel_booking_title": "Buchung stornieren",
+  "arrival_date_col": "Ankunftsdatum",
+  "minors_col": "Minderjährige",
+  "child_seat_col": "Babysitz",
+  "booster_seat_col": "Sitzerhöhung",
+  "more_info_btn": "Mehr Info",
+  "minors_age_col": "Alter der Minderjährigen",
+  "luggage_type_col": "Gepäck"
 }

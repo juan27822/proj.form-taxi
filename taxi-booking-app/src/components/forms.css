@@ -1,0 +1,49 @@
+/* --- Estilos de Formulario Comunes --- */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #6c757d; /* Color de etiqueta más suave */
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: #f8f9fa; /* Fondo de input muy claro */
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  color: #495057; /* Color de texto de input */
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.6rem;
+  transform: scale(1.2);
+}

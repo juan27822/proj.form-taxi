@@ -50,8 +50,8 @@ export const getBookingStatus = async (id: string) => {
 };
 
 export const searchBookings = async (params: SearchParams) => {
-    const response = await api.get('/bookings/search', { params });
-    return response;
+  const response = await api.get('/bookings/search', { params });
+  return response.data;
 };
 
 export const createBooking = async (bookingData: Booking) => {
@@ -72,6 +72,10 @@ export const updateBooking = async (id: string, bookingData: Partial<Booking>) =
 
 export const requestInfo = async (id: string, message: string) => {
   return await api.post(`/bookings/${id}/request-info`, { message });
+};
+
+export const archivePastBookings = async () => {
+  return await api.post('/bookings/archive-past');
 };
 
 export const getDashboardBookingsByDay = async (period = 'month') => {

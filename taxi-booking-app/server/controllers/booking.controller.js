@@ -34,8 +34,15 @@ const getAllBookings = async (req, res) => {
         const pageSize = parseInt(req.query.pageSize, 10) || 10;
         const skip = (page - 1) * pageSize;
 
+        const whereClause = {
+            status: {
+                not: 'archived'
+            }
+        };
+
         const [bookings, totalBookings] = await prisma.$transaction([
             prisma.booking.findMany({
+                where: whereClause,
                 skip: skip,
                 take: pageSize,
                 orderBy: {
@@ -43,7 +50,7 @@ const getAllBookings = async (req, res) => {
                 },
                 include: { driver: true } // Include driver data
             }),
-            prisma.booking.count()
+            prisma.booking.count({ where: whereClause })
         ]);
 
         res.json({
@@ -81,7 +88,7 @@ const getBookingStatusById = async (req, res) => {
 };
 
 const searchBookings = async (req, res) => {
-    const { name, arrival_date, destination, status, id } = req.query;
+    const { name, arrival_date, destination, status, id, startDate, endDate, startTime, endTime } = req.query;
 
     const filters = {};
     if (name) {
@@ -107,6 +114,15 @@ const searchBookings = async (req, res) => {
             contains: id
         };
     }
+    if (startDate && endDate) {
+        filters.arrival_date = { gte: startDate, lte: endDate };
+    }
+    if (startTime && endTime) {
+        filters.arrival_time = {
+            gte: startTime,
+            lte: endTime
+        };
+    }
 
     try {
         const bookings = await prisma.booking.findMany({
@@ -127,8 +143,19 @@ const createBooking = async (req, res) => {
     try {
         const customId = nanoid(8);
 
+        // --- CORRECCIÓN: Asegurar que la fecha se guarda en formato YYYY-MM-DD ---
+        const bookingData = { ...req.body };
+        if (bookingData.arrival_date) {
+            const date = new Date(bookingData.arrival_date);
+            bookingData.arrival_date = date.toISOString().split('T')[0];
+        }
+        if (bookingData.return_date) {
+            const date = new Date(bookingData.return_date);
+            bookingData.return_date = date.toISOString().split('T')[0];
+        }
+
         const newBooking = await prisma.booking.create({
-            data: { ...req.body, id: customId }
+            data: { ...bookingData, id: customId }
         });
         io.emit('newBooking', newBooking); // Notify all connected clients
 
@@ -295,6 +322,16 @@ const updateBooking = async (req, res) => {
             driverId: driverId === '' ? null : driverId,
         };
 
+        // --- CORRECCIÓN: Asegurar que la fecha se guarda en formato YYYY-MM-DD también al actualizar ---
+        if (updatedBookingData.arrival_date) {
+            const date = new Date(updatedBookingData.arrival_date);
+            updatedBookingData.arrival_date = date.toISOString().split('T')[0];
+        }
+        if (updatedBookingData.return_date) {
+            const date = new Date(updatedBookingData.return_date);
+            updatedBookingData.return_date = date.toISOString().split('T')[0];
+        }
+
         // Remove undefined fields to avoid overwriting with null
         Object.keys(updatedBookingData).forEach(key => {
             if (updatedBookingData[key] === undefined) {
@@ -432,7 +469,7 @@ const requestInfo = async (req, res) => {
             return res.status(400).json({ message: "Client does not have an email address on file." });
         }
 
-        const lang = booking.lang || 'es'; // Default to Spanish
+        const lang = booking.lang || 'es';
 
         const emailHtml = `
           <h1>${t(lang, 'email_query_title')}</h1>
@@ -458,6 +495,27 @@ const requestInfo = async (req, res) => {
     }
 };
 
+const archivePastBookings = async (req, res) => {
+    try {
+        const todayStr = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+
+        const result = await prisma.booking.updateMany({
+            where: {
+                arrival_date: { lt: todayStr },
+                status: { not: 'archived' }
+            },
+            data: {
+                status: 'archived'
+            }
+        });
+
+        res.json({ message: `${result.count} bookings archived successfully.` });
+    } catch (error) {
+        console.error("Error archiving past bookings:", error);
+        res.status(500).json({ message: "Error archiving past bookings" });
+    }
+};
+
 module.exports = {
     setSocketIO,
     setTranslator,
@@ -469,5 +527,6 @@ module.exports = {
     confirmBooking,
     cancelBooking,
     updateBooking,
-    requestInfo
+    requestInfo,
+    archivePastBookings
 };

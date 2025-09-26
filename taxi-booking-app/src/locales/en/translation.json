@@ -169,5 +169,12 @@
   "weekly": "Weekly",
   "monthly": "Monthly",
   "confirm_booking_title": "Confirm Booking",
-  "cancel_booking_title": "Cancel Booking"
+  "cancel_booking_title": "Cancel Booking",
+  "arrival_date_col": "Arrival Date",
+  "minors_col": "Minors",
+  "child_seat_col": "Baby Seat",
+  "booster_seat_col": "Booster Seat",
+  "more_info_btn": "More Info",
+  "minors_age_col": "Minors Age",
+  "luggage_type_col": "Luggage"
 }

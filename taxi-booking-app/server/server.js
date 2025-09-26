@@ -15,6 +15,7 @@ const bookingRoutes = require('./routes/booking.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const driverRoutes = require('./routes/driver.routes');
 const aiRoutes = require('./routes/ai.routes');
+const { loadTranslations, t } = require('./translator');
 const { validateUser } = require('./middleware');
 
 const prisma = new PrismaClient();
@@ -34,34 +35,7 @@ webpush.setVapidDetails(
 );
 
 // --- Internationalization Setup ---
-const loadTranslations = () => {
-  const localesDir = path.join(__dirname, '../src/locales');
-  const translations = {};
-  try {
-    const languages = require('fs').readdirSync(localesDir);
-    for (const lang of languages) {
-      const translationPath = path.join(localesDir, lang, 'translation.json');
-      if (require('fs').existsSync(translationPath)) {
-        const fileContent = require('fs').readFileSync(translationPath, 'utf8');
-        translations[lang] = JSON.parse(fileContent);
-      }
-    }
-  } catch (error) {
-    console.error('Error reading locales directory:', error);
-  }
-  return translations;
-};
-
-const translations = loadTranslations();
-
-const t = (lang, key, replacements = {}) => {
-  const langKey = lang.split('-')[0]; // Handle 'en-US' etc.
-  let translation = translations[langKey]?.[key] || translations.en[key] || key;
-  for (const placeholder in replacements) {
-    translation = translation.replace(`{${placeholder}}`, replacements[placeholder]);
-  }
-  return translation;
-};
+loadTranslations();
 // ------------------------------------
 
 

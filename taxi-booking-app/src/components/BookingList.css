@@ -1,229 +1,156 @@
-/* Make the container scrollable on x-axis */
 .booking-list-container {
   overflow-x: auto;
-  margin-top: 1.25rem;
-}
-
-.booking-list table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.booking-list th, .booking-list td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-  vertical-align: middle;
-}
-
-.booking-list th {
-  background-color: var(--primary-blue);
-  color: var(--text-light);
-  font-weight: bold;
-}
-
-.booking-list tr:nth-of-type(even) {
-  background-color: var(--neutral-light);
-}
-
-.booking-list tr:hover {
-  background-color: #e9ecef;
-}
-
-/* Status-specific row styles */
-.booking-list tr.status-cancelled {
-  background-color: #ffebee !important;
-  color: #c62828;
-}
-
-.booking-list tr.status-cancelled:hover {
-  background-color: #ffcdd2 !important;
-}
-
-.booking-list tr.status-confirmed {
-  background-color: #e8f5e9 !important;
-}
-
-.booking-list tr.status-confirmed:hover {
-  background-color: #c8e6c9 !important;
-}
-
-.booking-list tr.booking-amber {
-    background-color: #fff3cd !important;
-    color: #856404;
-}
-
-.booking-list tr.booking-amber:hover {
-    background-color: #ffeeba !important;
-}
-
-.booking-list tr.past-booking {
-    background-color: #e9ecef !important;
-    color: #6c757d !important;
-}
-
-.booking-list tr.past-booking:hover {
-    background-color: #dee2e6 !important;
-}
-
-/* Status label styles */
-.status-label {
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.75rem;
-  font-weight: bold;
-  color: white;
-  text-transform: capitalize;
-  font-size: 0.9em;
-  white-space: nowrap; /* Prevent wrapping */
-}
-
-.status-label-pending { background-color: #ffc107; }
-.status-label-confirmed { background-color: #4caf50; }
-.status-label-cancelled { background-color: #f44336; color: white; }
-
-/* Action button styles */
-.actions-cell {
-  display: grid;
-  grid-template-columns: 1fr; /* Single column for mobile */
-  gap: 0.3rem;
-}
-
-/* Use a media query to switch to two columns on larger screens */
-@media (min-width: 768px) {
-  .actions-cell {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.action-button {
-  padding: 0.4rem 0.6rem;
-  border: none;
-  border-radius: 0.25rem;
-  color: white;
-  cursor: pointer;
-  font-size: 0.85em;
-  transition: background-color 0.2s ease;
-  text-align: center;
-}
-
-.action-button.confirm { background-color: #28a745; }
-.action-button.confirm:hover { background-color: #218838; }
-.action-button.cancel { background-color: #dc3545; }
-.action-button.cancel:hover { background-color: #c82333; }
-.action-button.pdf { background-color: #007bff; }
-.action-button.pdf:hover { background-color: #0069d9; }
-.action-button.edit { background-color: #17a2b8; }
-.action-button.edit:hover { background-color: #138496; }
-.action-button.contact { background-color: #fd7e14; }
-.action-button.contact:hover { background-color: #e86a02; }
-
-.booking-list p {
-    text-align: center;
-    font-style: italic;
-    color: #6c757d;
-    margin-top: 1.25rem;
-}
-
-/* Modal styles */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  -webkit-overflow-scrolling: touch;
+  background-color: #fff;
   padding: 1rem;
-  z-index: 1000;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.modal-content {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 0.3rem;
-  width: 95%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
+.status-label {
+  padding: 3px 8px;
+  border-radius: 12px; /* Más redondeado */
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
 }
 
-.modal-actions {
+.status-label-pending { background-color: #ffc107; color: #000; }
+.status-label-confirmed { background-color: #28a745; }
+.status-label-cancelled { background-color: #dc3545; }
+.status-label-archived { background-color: #6c757d; }
+.past-booking {
+  background-color: #e9ecef;
+  color: #6c757d;
+}
+
+.today-booking {
+  /* Elimina el color de fondo y añade un borde izquierdo para un look más sutil */
+  border-left: 4px solid #28a745;
+}
+
+.booking-amber {
+  background-color: #fff3cd !important;
+  animation: blinker 1.5s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.actions-cell {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  margin-top: 1.25rem;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  margin-top: 1rem;
 }
 
-/* Notification styles */
-.notification {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  left: 1rem;
-  padding: 1rem 1.25rem;
-  border-radius: 0.5rem;
-  color: #fff;
-  font-size: 1rem;
-  z-index: 1050;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  opacity: 1;
-  transition: opacity 0.5s ease-in-out;
+.actions-cell button, .btn-edit, .btn-contact, .btn-confirm, .btn-cancel, .btn-pdf {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  transition: background-color 0.2s, transform 0.1s;
+  font-size: 0.75rem;
 }
 
-@media (min-width: 576px) {
-  .notification {
-    left: auto; /* Revert to only being on the right for larger screens */
-    max-width: 350px;
-  }
+.actions-cell button:hover, .btn-edit:hover, .btn-contact:hover, .btn-confirm:hover, .btn-cancel:hover, .btn-pdf:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
-/* Responsive Card View for Mobile */
-@media (max-width: 768px) {
-  .booking-list table {
-    min-width: 100%; /* Remove forced scroll */
-  }
+.btn-edit { background-color: var(--primary-blue); }
+.btn-contact { background-color: var(--primary-orange); }
+.btn-confirm { background-color: #28a745; }
+.btn-cancel { background-color: #dc3545; }
+.btn-pdf { background-color: #6c757d; }
 
-  .booking-list thead {
-    display: none; /* Hide table headers */
-  }
-
-  .booking-list tr {
-    display: block;
-    margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 0.25rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  .booking-list td {
-    display: block;
-    text-align: right;
-    border-bottom: 1px solid #eee;
-    position: relative;
-    padding-left: 50%;
-  }
-
-  .booking-list td:last-child {
-    border-bottom: 0;
-  }
-
-  .booking-list td::before {
-    content: attr(data-label);
-    position: absolute;
-    left: 0.75rem;
-    width: 45%;
-    padding-right: 0.75rem;
-    white-space: nowrap;
-    text-align: left;
-    font-weight: bold;
-  }
-
-  .actions-cell {
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  }
+.booking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.notification-success { background-color: #28a745; }
-.notification-error { background-color: #dc3545; }
+.booking-item {
+  background-color: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 1rem;
+}
+
+.booking-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-item {
+  flex: 1 1 150px;
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-item strong {
+  font-weight: bold;
+  color: #6c757d;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.booking-details {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+}
+
+.booking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.booking-details summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--primary-blue);
+  list-style: none; /* Remove default marker */
+}
+
+.booking-details summary::-webkit-details-marker {
+  display: none; /* Remove default marker for Chrome/Safari */
+}
+
+.booking-details summary::before {
+  content: '▼';
+  display: inline-block;
+  margin-right: 0.5rem;
+  transition: transform 0.2s;
+}
+
+.booking-details[open] summary::before {
+  transform: rotate(180deg);
+}
+
+.details-content {
+  padding-top: 1rem;
+}
+
+.details-content p {
+  margin: 0.5rem 0;
+}
+
+.booking-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  align-content: start;
+}

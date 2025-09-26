@@ -8,7 +8,8 @@ const {
     confirmBooking,
     cancelBooking,
     updateBooking,
-    requestInfo
+    requestInfo,
+    archivePastBookings
 } = require('../controllers/booking.controller');
 const { validateBooking, authenticateToken } = require('../middleware');
 
@@ -16,6 +17,7 @@ router.get('/', authenticateToken, getAllBookings);
 router.get('/search', authenticateToken, searchBookings);
 router.get('/status/:id', getBookingStatusById); // Public route
 router.post('/', validateBooking, createBooking);
+router.post('/archive-past', authenticateToken, archivePastBookings); // <-- AÑADIR ESTA LÍNEA
 router.post('/:id/confirm', authenticateToken, confirmBooking);
 router.post('/:id/cancel', authenticateToken, cancelBooking);
 router.put('/:id', authenticateToken, validateBooking, updateBooking);

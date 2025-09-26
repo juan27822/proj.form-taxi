@@ -1,21 +1,38 @@
 .search-form {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap; /* Permite que los elementos se ajusten en pantallas pequeñas */
+  gap: 12px;
+  margin-bottom: 20px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .search-form input,
 .search-form select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  padding: 8px 12px; /* Padding reducido */
+  border: 1px solid #ced4da; /* Color de borde más suave */
+  border-radius: 6px;
+  font-size: 0.9rem; /* Fuente ligeramente más pequeña */
+  background-color: #f8f9fa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-form input:focus,
+.search-form select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .search-form button {
-    padding: 10px 20px;
-    background-color: var(--primary-blue);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  padding: 8px 16px; /* Padding consistente con otros botones */
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }

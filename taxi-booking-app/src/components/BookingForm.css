@@ -1,46 +1,11 @@
-.booking-form .form-group {
-  margin-bottom: 1rem;
-}
-
-.booking-form label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-weight: bold;
-  color: var(--neutral-dark);
-}
+@import './forms.css'; /* Importa los estilos comunes */
 
 .booking-form .checkbox-label {
   display: flex;
   flex-direction: row;
   align-items: center;
   font-weight: normal;
-}
-
-.booking-form .checkbox-label input {
-  width: auto;
-  margin-right: 0.6rem;
-}
-
-.booking-form input[type="text"],
-.booking-form input[type="tel"],
-.booking-form input[type="email"],
-.booking-form input[type="number"],
-.booking-form input[type="date"],
-.booking-form input[type="time"],
-.booking-form textarea {
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #ccc;
-  border-radius: 0.25rem;
-  box-sizing: border-box;
-  transition: border-color 0.2s;
-  font-size: 1rem; /* Ensure readable font size */
-}
-
-.booking-form input:focus,
-.booking-form textarea:focus {
-  outline: none;
-  border-color: var(--primary-blue);
+  color: #495057; /* Asegura que el texto de la etiqueta sea consistente */
 }
 
 .submit-container {

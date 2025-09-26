@@ -32,8 +32,8 @@ export const useBookingStore = create<BookingState>((set) => ({
     });
   },
   searchBookings: async (params: SearchParams) => {
-    const response = await searchBookingsApi(params);
-    set({ bookings: response.data }); // Note: search is not paginated in this implementation
+    const bookingsData = await searchBookingsApi(params);
+    set({ bookings: bookingsData, totalPages: 1, page: 1 }); // Reset pagination for search results
   },
   addBooking: (booking) => {
     set((state) => ({ bookings: [booking, ...state.bookings] }));

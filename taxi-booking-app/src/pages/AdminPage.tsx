@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { io } from 'socket.io-client';
 import { Booking } from '../types';
 import BookingList from '../components/BookingList';
 import LoginForm from '../components/LoginForm';
 import SearchForm from '../components/SearchForm';
-import Dashboard from '../components/Dashboard'; // Import Dashboard
+import ConfirmModal from '../components/ConfirmModal'; // Importar ConfirmModal
+import { archivePastBookings as apiArchivePastBookings } from '../api'; // Importar la nueva función de la API
 import { useBookingStore } from '../store';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
@@ -15,8 +16,33 @@ const AdminPage: React.FC = () => {
   const { bookings, page, totalPages, pageSize, fetchBookings, searchBookings, addBooking } = useBookingStore();
   const [alarmSound, setAlarmSound] = useState<HTMLAudioElement | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('token_v2'));
+  const [confirmation, setConfirmation] = useState<{ title: string; message: string; onConfirm: () => void; } | null>(null);
   const [currentPageSize, setCurrentPageSize] = useState(pageSize);
+  const [activeFilter, setActiveFilter] = useState('all');
   const navigate = useNavigate(); // Initialize useNavigate
+
+  const stats = useMemo(() => {
+    if (!bookings) return { pendingCount: 0, forTodayCount: 0, earlyMorningCount: 0 };
+
+    const pendingCount = bookings.filter(b => b.status === 'pending').length;
+    
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const forTodayCount = bookings.filter(b => b.arrival_date === todayStr).length;
+
+    const earlyMorningCount = bookings.filter(b => 
+      b.arrival_date === tomorrowStr && 
+      b.arrival_time >= '01:00' && 
+      b.arrival_time <= '09:00'
+    ).length;
+
+    return { pendingCount, forTodayCount, earlyMorningCount };
+  }, [bookings]);
 
   // Initialize alarm sound once
   useEffect(() => {
@@ -43,7 +69,13 @@ const AdminPage: React.FC = () => {
 
     socket.on('newBooking', (newBooking: Booking) => {
       console.log('New booking received:', newBooking);
-      alarmSound?.play();
+      // --- MODIFICACIÓN ---
+      // Intentamos reproducir el sonido y capturamos posibles errores.
+      alarmSound?.play().catch(error => {
+        console.error("Error al reproducir la alarma:", error);
+        alert("No se pudo reproducir el sonido de la alarma. Es posible que necesites interactuar con la página primero (hacer clic en algún lugar).");
+      });
+      // --- FIN DE LA MODIFICACIÓN ---
       addBooking(newBooking);
 
       if (Notification.permission === "granted") {
@@ -74,14 +106,35 @@ const AdminPage: React.FC = () => {
     setToken(null);
   };
 
-  const handleSearch = (field: string, value: string) => {
-    searchBookings({ [field]: value });
+  const handleSearch = (params: { [key: string]: string }) => {
+    searchBookings(params);
   };
 
   const handleClearSearch = () => {
     fetchBookings(1, currentPageSize);
+    setActiveFilter('all');
   };
 
+  const handleStatusFilter = (status: string) => {
+    if (status === 'all') {
+      handleClearSearch();
+    } else {
+      searchBookings({ status });
+      setActiveFilter(status);
+    }
+  };
+
+  const handleArchivePastBookings = () => {
+    setConfirmation({
+      title: t('archive_confirm_title'),
+      message: t('archive_confirm_message'),
+      onConfirm: async () => {
+        await apiArchivePastBookings();
+        fetchBookings(page, currentPageSize); // Refrescar la lista
+        setConfirmation(null);
+      },
+    });
+  };
   const handleNextPage = () => {
     if (page < totalPages) {
       fetchBookings(page + 1, currentPageSize);
@@ -139,13 +192,60 @@ const AdminPage: React.FC = () => {
         <div className="admin-header-actions">
           <button onClick={() => navigate('/charts')}>{t('charts_btn')}</button>
           <button onClick={exportToCsv}>{t('export_csv_btn')}</button>
+          <button onClick={() => navigate('/admin/archived')}>{t('view_archived_btn', 'Ver Archivadas')}</button>
+          <button onClick={handleArchivePastBookings}>{t('archive_past_bookings_btn')}</button>
           <button onClick={handleLogout}>{t('logout_btn')}</button>
         </div>
       </header>
 
-      <Dashboard />
-
       {/* <DriverManagement /> */}
+
+      <div className="stat-cards">
+        <div className="stat-card" onClick={() => handleStatusFilter('pending')}>
+          <span className="stat-value">{stats.pendingCount}</span>
+          <span className="stat-label">{t('pending_bookings', 'Pendientes')}</span>
+        </div>
+        <div className="stat-card" onClick={() => searchBookings({ arrival_date: new Date().toISOString().split('T')[0] })}>
+          <span className="stat-value">{stats.forTodayCount}</span>
+          <span className="stat-label">{t('bookings_for_today', 'Para Hoy')}</span>
+        </div>
+        <div className="stat-card" onClick={() => {
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const tomorrowStr = tomorrow.toISOString().split('T')[0];
+          searchBookings({ arrival_date: tomorrowStr, startTime: '01:00', endTime: '09:00' });
+        }}>
+          <span className="stat-value">{stats.earlyMorningCount}</span>
+          <span className="stat-label">{t('tomorrow_early_bookings', 'Mañana (1-9h)')}</span>
+        </div>
+      </div>
+
+      <div className="quick-filters">
+        <button
+          className={`filter-btn ${activeFilter === 'all' ? 'active' : ''}`}
+          onClick={() => handleStatusFilter('all')}
+        >
+          {t('all_bookings', 'Todos')}
+        </button>
+        <button
+          className={`filter-btn ${activeFilter === 'pending' ? 'active' : ''}`}
+          onClick={() => handleStatusFilter('pending')}
+        >
+          {t('pending')}
+        </button>
+        <button
+          className={`filter-btn ${activeFilter === 'confirmed' ? 'active' : ''}`}
+          onClick={() => handleStatusFilter('confirmed')}
+        >
+          {t('confirmed')}
+        </button>
+        <button
+          className={`filter-btn ${activeFilter === 'cancelled' ? 'active' : ''}`}
+          onClick={() => handleStatusFilter('cancelled')}
+        >
+          {t('cancelled')}
+        </button>
+      </div>
 
       <SearchForm onSearch={handleSearch} onClear={handleClearSearch} />
       <BookingList bookings={bookings} onUpdate={() => fetchBookings(page, currentPageSize)} />
@@ -166,9 +266,17 @@ const AdminPage: React.FC = () => {
           <option value={50}>50</option>
         </select>
       </div>
+
+      {confirmation && (
+        <ConfirmModal
+          title={confirmation.title}
+          message={confirmation.message}
+          onConfirm={confirmation.onConfirm}
+          onCancel={() => setConfirmation(null)}
+        />
+      )}
     </div>
   );
 };
 
 export default AdminPage;
-

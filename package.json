@@ -1,5 +1,8 @@
 {
-  "devDependencies": {
-    "vite-plugin-pwa": "^1.0.3"
-  }
+  "name": "proj-form-taxi-monorepo",
+  "private": true,
+  "workspaces": [
+    "taxi-booking-app",
+    "server"
+  ]
 }

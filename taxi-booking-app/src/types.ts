@@ -59,6 +59,11 @@ export interface SearchParams {
   phone?: string;
   arrival_date?: string;
   id?: string;
+  status?: 'pending' | 'confirmed' | 'cancelled' | 'archived';
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 // Chart-related types

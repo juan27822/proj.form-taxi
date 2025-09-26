@@ -4,6 +4,7 @@ import ClientPage from './pages/ClientPage';
 import AdminPage from './pages/AdminPage';
 import CheckBookingPage from './pages/CheckBookingPage';
 import ChartsPage from './components/ChartsPage'; // Import ChartsPage
+import ArchivedBookingsPage from './pages/ArchivedBookingsPage'; // Import ArchivedBookingsPage
 import './index.css'; // Keep global styles
 
 const App: React.FC = () => {
@@ -52,6 +53,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<ClientPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/archived" element={<ArchivedBookingsPage />} />
         <Route path="/check-booking" element={<CheckBookingPage />} />
         <Route path="/charts" element={<ChartsPage />} /> {/* Add new route for ChartsPage */}
       </Routes>
