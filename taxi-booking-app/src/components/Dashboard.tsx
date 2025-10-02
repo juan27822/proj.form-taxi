@@ -4,7 +4,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer 
 } from 'recharts';
 import { getDashboardBookingsByDay, getDashboardPopularDestinations } from '../api';
-import { BookingsByPeriod } from '../types';
+import { BookingsByPeriod, ChartData, DashboardPopularDestinationData } from '../types';
 
 const dashboardContainerStyle: React.CSSProperties = {
   display: 'grid',
@@ -25,8 +25,8 @@ const dashboardItemStyle: React.CSSProperties = {
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
-  const [bookingsByDay, setBookingsByDay] = useState<any[]>([]);
-  const [popularDestinations, setPopularDestinations] = useState<any[]>([]);
+  const [bookingsByDay, setBookingsByDay] = useState<ChartData[]>([]);
+  const [popularDestinations, setPopularDestinations] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,17 +36,17 @@ const Dashboard: React.FC = () => {
       setError(null);
       try {
         const [byDayResult, popularResult] = await Promise.all([
-          getDashboardBookingsByDay('day'),
-          getDashboardPopularDestinations(5),
+          getDashboardBookingsByDay(),
+          getDashboardPopularDestinations(),
         ]);
 
         const transformedBookingsByDay = byDayResult.map((item: BookingsByPeriod) => ({
-          name: item.period,
-          value: item.oneWay + item.roundTrip,
+          name: item.date,
+          value: item.count,
         }));
         setBookingsByDay(transformedBookingsByDay);
 
-        const transformedPopularDestinations = popularResult.map((item: any) => ({
+        const transformedPopularDestinations = popularResult.map((item: DashboardPopularDestinationData) => ({
           name: item.destination,
           value: item.count,
         }));

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Booking } from '../types';
 import { useTranslation } from 'react-i18next';
 import { getDrivers } from '../api';
+import './EditBookingModal.css';
 
 interface EditBookingModalProps {
   booking: Booking;
@@ -47,18 +48,17 @@ const EditBookingModal: React.FC<EditBookingModalProps> = ({ booking, onClose, o
   };
 
   const handleSave = () => {
-    // Create a copy of updatedBooking to avoid direct mutation
     const bookingToSend = { ...updatedBooking };
-    // Remove the driver object as the backend only expects driverId
-    if (bookingToSend.driver) {
-      delete bookingToSend.driver;
-    }
+    
+    // Set the modification flag to true
+    bookingToSend.isModification = true;
+
     onSave(bookingToSend);
   };
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div className="edit-booking-modal-content">
         <h2>{t('edit_booking_title')}</h2>
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>

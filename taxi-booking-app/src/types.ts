@@ -1,76 +1,37 @@
-export interface Driver {
-  id: string;
-  name: string;
-  phone: string;
-}
+import type {
+  Booking as PrismaBooking,
+  Driver as PrismaDriver,
+} from '@prisma/client';
 
-export interface Booking {
-  id: string;
-  receivedAt: string; // Date and time when the booking was received
-  status: 'pending' | 'confirmed' | 'cancelled';
+// Re-exportamos los tipos de Prisma para usarlos en toda la aplicación.
+// Esto asegura que el frontend y el backend siempre estén sincronizados.
+export type Booking = PrismaBooking;
+export type Driver = PrismaDriver;
+// Puedes añadir aquí otros tipos que necesites exportar desde Prisma
+export * from '@prisma/client';
 
-  // Customer info
-  name: string;
-  phone: string;
-  email?: string;
-  people: number;
-  hasMinors?: boolean; // New: if minors are coming
-  minorsAge?: string; // New: age of minors
-  needsBabySeat?: boolean; // New: if baby seat is needed
-  needsBooster?: boolean; // New: if booster is needed
-  luggageType?: string; // New: type of luggage
+// --- Tipos Adicionales para la Aplicación ---
 
-  // Arrival info
-  arrival_date: string;
-  arrival_time: string;
-  arrival_flight_number?: string;
-  destination: string;
-
-  // Return trip info (optional)
-  return_date?: string;
-  return_time?: string;
-  return_flight_time?: string;
-  return_pickup_address?: string;
-  return_flight_number?: string;
-
-  // Additional info
-  additional_info?: string;
-
-  // Modification info
-  isModification?: boolean; // New: if this booking is a modification
-  originalBookingId?: string; // New: original booking ID if it's a modification
-  driver?: Driver;
-  driverId?: string | null;
-}
-
-export interface Credentials {
-  username: string;
-  password: string;
-}
-
-export interface UserData {
-  name: string;
-  email: string;
-  pass: string;
-}
-
+// Tipos para parámetros de búsqueda de reservas
 export interface SearchParams {
   name?: string;
   phone?: string;
-  arrival_date?: string;
-  id?: string;
-  status?: 'pending' | 'confirmed' | 'cancelled' | 'archived';
-  startDate?: string;
-  endDate?: string;
-  startTime?: string;
-  endTime?: string;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  pageSize?: number;
 }
 
-// Chart-related types
-export interface ChartData {
-  name: string;
-  value: number;
-  [key: string]: any;
+// Tipos para dashboard
+export interface BookingsByPeriod {
+  date: string;
+  count: number;
+}
+
+export interface BookingsByHour {
+  hour: string;
+  count: number;
 }
 
 export interface PhoneOriginData {
@@ -79,17 +40,23 @@ export interface PhoneOriginData {
 }
 
 export interface RoundtripOnewayData {
-  type: string;
+  type: 'roundtrip' | 'oneway';
   count: number;
 }
 
-export interface BookingsByPeriod {
-  period: string;
-  oneWay: number;
-  roundTrip: number;
+export interface DashboardPopularDestinationData {
+  destination: string;
+  count: number;
 }
 
-export interface BookingsByHour {
-  hour: string;
-  count: number;
+// Tipos para autenticación
+export interface Credentials {
+  username: string;
+  password: string;
+}
+
+export interface ChartData {
+  name: string;
+  value: number;
+  [key: string]: any;
 }

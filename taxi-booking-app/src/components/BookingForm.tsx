@@ -1,225 +1,203 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useForm, FormProvider } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { createBooking } from '../api';
-import { Booking } from '../types';
-import './BookingForm.css';
-import axios from 'axios';
+import { useTheme, useMediaQuery, Button, CircularProgress, Alert, Box, Stepper, Step, StepLabel } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+
+import TripDetailsStep from './booking-form-steps/TripDetailsStep';
+import PassengerDetailsStep from './booking-form-steps/PassengerDetailsStep';
+import ReturnTripStep from './booking-form-steps/ReturnTripStep';
+import ReviewStep from './booking-form-steps/ReviewStep';
+
+const steps = ['trip_details', 'passenger_details', 'return_trip', 'review_and_submit'];
+const FORM_DATA_KEY = 'bookingFormData';
 
 const BookingForm: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const [formData, setFormData] = useState<Partial<Booking>>({
+  const [activeStep, setActiveStep] = useState(0);
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const bookingSchema = z.object({
+    name: z.string().min(1, t('validation_name_required')),
+    phone: z.string().min(1, t('validation_phone_required')),
+    email: z.string().email(t('validation_email_invalid')).optional().or(z.literal('')),
+    people: z.number().min(1, t('validation_people_min')),
+    hasMinors: z.boolean(),
+    minorsAge: z.string().optional(),
+    needsBabySeat: z.boolean(),
+    needsBooster: z.boolean(),
+    luggageType: z.string().min(1, t('validation_luggage_required')),
+    arrival_date: z.any().refine(val => val, { message: t('validation_arrival_date_required') }),
+    arrival_time: z.any().refine(val => val, { message: t('validation_arrival_time_required') }),
+    arrival_flight_number: z.string().optional(),
+    destination: z.string().min(1, t('validation_destination_required')),
+    return_date: z.any().optional(),
+    return_time: z.any().optional(),
+    return_flight_time: z.string().optional(),
+    return_pickup_address: z.string().optional(),
+    return_flight_number: z.string().optional(),
+    additional_info: z.string().optional(),
+    isModification: z.boolean(),
+    originalBookingId: z.string().optional(),
+  });
+
+  type BookingFormData = z.infer<typeof bookingSchema>;
+
+  const savedData = localStorage.getItem(FORM_DATA_KEY);
+  const defaultValues = savedData ? JSON.parse(savedData, (key, value) => {
+    if ([ 'arrival_date', 'arrival_time', 'return_date', 'return_time'].includes(key) && value) {
+      return dayjs(value);
+    }
+    return value;
+  }) : {
+    name: '',
+    phone: '',
+    email: '',
+    people: 1,
     hasMinors: false,
+    minorsAge: '',
     needsBabySeat: false,
     needsBooster: false,
+    luggageType: '',
+    arrival_date: null,
+    arrival_time: null,
+    arrival_flight_number: '',
+    destination: '',
+    return_date: null,
+    return_time: null,
+    return_flight_time: '',
+    return_pickup_address: '',
+    return_flight_number: '',
+    additional_info: '',
+    isModification: false,
+    originalBookingId: '',
+  };
+
+  const methods = useForm<BookingFormData>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues,
+    mode: 'onChange'
   });
-  const [showReturn, setShowReturn] = useState(false);
+
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', message: string} | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const watchedData = methods.watch();
+  useEffect(() => {
+    localStorage.setItem(FORM_DATA_KEY, JSON.stringify(watchedData));
+  }, [watchedData]);
 
   useEffect(() => {
     if (statusMessage) {
       const timer = setTimeout(() => {
         setStatusMessage(null);
-      }, 5000); // El mensaje desaparece después de 5 segundos
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [statusMessage]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
-
-    let finalValue: string | number | boolean = value;
-    if (type === 'checkbox') {
-      finalValue = checked;
-    } else if (name === 'people') {
-      finalValue = Number(value);
-    } else if (value === 'true' || value === 'false') {
-      finalValue = value === 'true';
+  const handleNext = async () => {
+    const fieldsByStep: (keyof BookingFormData)[][] = [
+        ['arrival_date', 'arrival_time', 'destination'], 
+        ['name', 'phone', 'email', 'people', 'luggageType'],
+        [] // No validation for optional return trip step
+    ];
+    const isValid = activeStep >= fieldsByStep.length ? true : await methods.trigger(fieldsByStep[activeStep]);
+    if (isValid) {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: finalValue
-    }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const onSubmit = async (data: BookingFormData) => {
     setStatusMessage(null);
-    setIsSubmitting(true);
     try {
       const dataToSend = {
-        ...formData,
+        ...data,
+        email: data.email || null,
+        minorsAge: data.minorsAge || null,
+        arrival_flight_number: data.arrival_flight_number || null,
+        return_flight_time: data.return_flight_time || null,
+        return_pickup_address: data.return_pickup_address || null,
+        return_flight_number: data.return_flight_number || null,
+        additional_info: data.additional_info || null,
+        originalBookingId: data.originalBookingId || null,
+        arrival_date: dayjs(data.arrival_date).format('YYYY-MM-DD'),
+        arrival_time: dayjs(data.arrival_time).format('HH:mm'),
+        return_date: data.return_date ? dayjs(data.return_date).format('YYYY-MM-DD') : null,
+        return_time: data.return_time ? dayjs(data.return_time).format('HH:mm') : null,
         lang: i18n.language,
       };
-      await createBooking(dataToSend as Booking);
+      await createBooking(dataToSend);
       setStatusMessage({ type: 'success', message: t('booking_success_message') });
-      setFormData({}); // Clear form
-      setShowReturn(false);
+      methods.reset();
+      localStorage.removeItem(FORM_DATA_KEY);
+      setActiveStep(0);
     } catch (error: unknown) {
-        if (axios.isAxiosError(error) && error.response) {
-            setStatusMessage({ type: 'error', message: error.response.data.message });
-        } else {
-            setStatusMessage({ type: 'error', message: t('booking_error_message') });
-        }
-    } finally {
-      setIsSubmitting(false);
+      setStatusMessage({ type: 'error', message: t('booking_error_message') });
+    }
+  };
+
+  const getStepContent = (step: number) => {
+    switch (step) {
+      case 0:
+        return <TripDetailsStep />;
+      case 1:
+        return <PassengerDetailsStep />;
+      case 2:
+        return <ReturnTripStep />;
+      case 3:
+        return <ReviewStep />;
+      default:
+        return 'Unknown step';
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="booking-form">
-      <h2>{t('customer_info')}</h2>
-      <div className="form-group">
-        <label>{t('name_label')}</label>
-        <input type="text" name="name" value={formData.name || ''} placeholder={t('name_placeholder')} onChange={handleChange} required />
-        <small>{t('name_clarification')}</small>
-      </div>
-      <div className="form-group">
-        <label>{t('phone_label')}</label>
-        <input type="tel" name="phone" value={formData.phone || ''} placeholder={t('phone_placeholder')} onChange={handleChange} required />
-        <small>{t('phone_clarification')}</small>
-      </div>
-      <div className="form-group">
-        <label>{t('email_label')}</label>
-        <input type="email" name="email" value={formData.email || ''} onChange={handleChange} />
-      </div>
-      <div className="form-group">
-        <label>{t('people_label')}</label>
-        <input type="number" name="people" value={formData.people || ''} onChange={handleChange} min="1" required />
-      </div>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <FormProvider {...methods}>
+        <Box component="form" onSubmit={methods.handleSubmit(onSubmit)} sx={{ mt: 3 }}>
+          <Stepper activeStep={activeStep} orientation={isMobile ? 'vertical' : 'horizontal'} sx={{ mb: 4 }}>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{t(label)}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
 
-      {/* New: Minors Info */}
-      <div className="form-group">
-        <label>{t('has_minors_label')}</label>
-        <div className="radio-group">
-          <label>
-            <input type="radio" name="hasMinors" value="true" checked={formData.hasMinors === true} onChange={handleChange} />
-            {t('yes_label')}
-          </label>
-          <label>
-            <input type="radio" name="hasMinors" value="false" checked={formData.hasMinors === false} onChange={handleChange} />
-            {t('no_label')}
-          </label>
-        </div>
-      </div>
-      {formData.hasMinors && (
-        <div className="form-group">
-          <label>{t('minors_age_label')}</label>
-          <input type="text" name="minorsAge" value={formData.minorsAge || ''} placeholder={t('minors_age_placeholder')} onChange={handleChange} />
-        </div>
-      )}
-      <div className="form-group">
-        <label>{t('needs_baby_seat_label')}</label>
-        <div className="radio-group">
-          <label>
-            <input type="radio" name="needsBabySeat" value="true" checked={formData.needsBabySeat === true} onChange={handleChange} />
-            {t('yes_label')}
-          </label>
-          <label>
-            <input type="radio" name="needsBabySeat" value="false" checked={formData.needsBabySeat === false} onChange={handleChange} />
-            {t('no_label')}
-          </label>
-        </div>
-      </div>
-      <div className="form-group">
-        <label>{t('needs_booster_label')}</label>
-        <div className="radio-group">
-          <label>
-            <input type="radio" name="needsBooster" value="true" checked={formData.needsBooster === true} onChange={handleChange} />
-            {t('yes_label')}
-          </label>
-          <label>
-            <input type="radio" name="needsBooster" value="false" checked={formData.needsBooster === false} onChange={handleChange} />
-            {t('no_label')}
-          </label>
-        </div>
-      </div>
-      <div className="form-group">
-        <label>{t('luggage_type_label')}</label>
-        <input type="text" name="luggageType" value={formData.luggageType || ''} placeholder={t('luggage_type_placeholder')} onChange={handleChange} required />
-      </div>
+          {getStepContent(activeStep)}
 
-      <h2>{t('arrival_info')}</h2>
-      <div className="form-group">
-        <label>{t('arrival_date_label')}</label>
-        <input type="date" name="arrival_date" value={formData.arrival_date || ''} onChange={handleChange} required />
-      </div>
-      <div className="form-group">
-        <label>{t('arrival_time_label')}</label>
-        <input type="time" name="arrival_time" value={formData.arrival_time || ''} onChange={handleChange} required />
-      </div>
-      <div className="form-group">
-        <label>{t('arrival_flight_label')}</label>
-        <input type="text" name="arrival_flight_number" value={formData.arrival_flight_number || ''} onChange={handleChange} />
-      </div>
-      <div className="form-group">
-        <label>{t('destination_label')}</label>
-        <input type="text" name="destination" value={formData.destination || ''} onChange={handleChange} required />
-      </div>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+            {activeStep !== 0 && (
+              <Button onClick={handleBack} sx={{ mr: 1 }}>
+                {t('back_button')}
+              </Button>
+            )}
 
-      <h2>{t('return_trip_info')}</h2>
-      <div className="form-group">
-        <label className="checkbox-label">
-          <input type="checkbox" checked={showReturn} onChange={() => setShowReturn(!showReturn)} />
-          {t('book_return_trip_label')}
-        </label>
-      </div>
-      {showReturn && (
-        <>
-          <div className="form-group">
-            <label>{t('return_date_label')}</label>
-            <input type="date" name="return_date" value={formData.return_date || ''} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>{t('return_time_label')}</label>
-            <input type="time" name="return_time" value={formData.return_time || ''} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>{t('return_flight_time_label')}</label>
-            <input type="time" name="return_flight_time" value={formData.return_flight_time || ''} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>{t('return_pickup_label')}</label>
-            <input type="text" name="return_pickup_address" value={formData.return_pickup_address || ''} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>{t('return_flight_label')}</label>
-            <input type="text" name="return_flight_number" value={formData.return_flight_number || ''} onChange={handleChange} />
-          </div>
-        </>
-      )}
+            {activeStep === steps.length - 1 ? (
+              <Button type="submit" variant="contained" color="primary" disabled={methods.formState.isSubmitting}>
+                {methods.formState.isSubmitting ? <CircularProgress size={24} /> : t('submit_button')}
+              </Button>
+            ) : (
+              <Button variant="contained" onClick={handleNext}>
+                {t('next_button')}
+              </Button>
+            )}
+          </Box>
 
-      <h2>{t('additional_info')}</h2>
-      <textarea name="additional_info" value={formData.additional_info || ''} placeholder={t('additional_info_placeholder')} onChange={handleChange}></textarea>
-
-      {/* New: Modification Info */}
-      <h2>{t('modification_info')}</h2>
-      <div className="form-group">
-        <label className="checkbox-label">
-          <input type="checkbox" name="isModification" checked={formData.isModification || false} onChange={handleChange} />
-          {t('is_modification_label')}
-        </label>
-      </div>
-      {formData.isModification && (
-        <div className="form-group">
-          <label>{t('original_booking_id_label')}</label>
-          <input type="text" name="originalBookingId" value={formData.originalBookingId || ''} placeholder={t('original_booking_id_placeholder')} onChange={handleChange} />
-        </div>
-      )}
-
-      <div className="submit-container">
-        <button type="submit" className="submit-btn" disabled={isSubmitting}>
-          {isSubmitting ? t('submitting_button') : t('submit_button')}
-        </button>
-        {statusMessage && 
-          <div className={`status-message ${statusMessage.type}`}>
-            {statusMessage.message}
-          </div>
-        }
-      </div>
-    </form>
+          {statusMessage && <Alert severity={statusMessage.type} sx={{ mt: 2 }}>{statusMessage.message}</Alert>}
+        </Box>
+      </FormProvider>
+    </LocalizationProvider>
   );
 };
 
