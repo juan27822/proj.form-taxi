@@ -8,14 +8,14 @@ export default defineConfig({
     proxy: {
       // Redirige las peticiones de /api al servidor backend
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:3002', // Match the new backend port
         changeOrigin: true,
       },
     },
   },
-  // test: {
-  //   globals: true,
-  //   environment: 'jsdom',
-  //   setupFiles: './src/setupTests.ts',
-  // },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
+  },
 })

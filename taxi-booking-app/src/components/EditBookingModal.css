@@ -57,7 +57,7 @@
 }
 
 .edit-booking-modal-content .btn-save:hover {
-  background-color: #008a99;
+  filter: brightness(90%); /* Oscurece ligeramente el color base al pasar el ratón */
 }
 
 .edit-booking-modal-content .btn-cancel {

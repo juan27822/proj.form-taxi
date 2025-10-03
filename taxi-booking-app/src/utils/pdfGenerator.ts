@@ -16,7 +16,9 @@ export const generatePdf = (booking: Booking, full: boolean, t: TFunction) => {
   doc.text('Booking Details', 20, y); y += 10;
   addText('ID', booking.id);
   addText('Status', t(booking.status));
-  addText('Received At', new Date(booking.receivedAt).toLocaleString());
+  if (booking.receivedAt) {
+    addText('Received At', new Date(booking.receivedAt).toLocaleString());
+  }
   addText('Name', booking.name);
   addText('Phone', booking.phone);
   addText('Email', booking.email);

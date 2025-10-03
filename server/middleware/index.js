@@ -10,7 +10,7 @@ const bookingSchema = Joi.object({
     email: Joi.string().email().optional(),
     people: Joi.number().integer().min(1).required(),
     hasMinors: Joi.boolean().optional(),
-        minorsAge: Joi.string().allow('', null).optional(),
+    minorsAge: Joi.string().allow('', null).optional(),
     needsBabySeat: Joi.boolean().optional(),
     needsBooster: Joi.boolean().optional(),
     luggageType: Joi.string().allow('', null).optional(),
@@ -57,19 +57,19 @@ const validateUser = (req, res, next) => {
 };
 
 const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers['authorization'] || req.headers['Authorization'];
     console.log('Auth Header:', authHeader); // Added log
     const token = authHeader && authHeader.split(' ')[1];
     console.log('Token:', token); // Added log
     if (token == null) {
-        console.log('No token provided, sending 401'); // Added log
-        return res.sendStatus(401);
+        console.log('No token provided, sending 401');
+        return res.status(401).json({ message: 'Authentication token is required.' });
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
-            console.log('Token verification failed, sending 403. Error:', err.message); // Added log
-            return res.sendStatus(403);
+            console.log('Token verification failed, sending 403. Error:', err.message);
+            return res.status(403).json({ message: 'Invalid or expired token.' });
         }
         req.user = user;
         console.log('Token verified, user:', user); // Added log

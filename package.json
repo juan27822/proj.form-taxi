@@ -4,5 +4,18 @@
   "workspaces": [
     "taxi-booking-app",
     "server"
-  ]
+  ],
+  "scripts": {
+    "dev:client": "npm run dev -w taxi-booking-app",
+    "dev:server": "npm run start -w server",
+    "build:client": "npm run build -w taxi-booking-app",
+    "lint:client": "npm run lint -w taxi-booking-app",
+    "install:client": "npm install -w taxi-booking-app",
+    "install:server": "npm install -w server",
+    "start": "npm-run-all --parallel dev:client dev:server",
+    "dev": "npm-run-all --parallel dev:client dev:server"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
 }

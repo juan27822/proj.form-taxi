@@ -15,7 +15,7 @@ const CheckBookingPage: React.FC = () => {
         }
         try {
             const response = await getBookingStatus(bookingId);
-            setBookingStatus(response.data.status);
+            setBookingStatus(response.status);
             setError(null);
         } catch (err) {
             setBookingStatus(null);

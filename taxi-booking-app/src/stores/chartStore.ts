@@ -4,12 +4,12 @@ import { ChartData, PhoneOriginData, RoundtripOnewayData, BookingsByPeriod, Book
 
 interface ChartState {
   phoneOriginData: ChartData[];
-  roundtripOnewayData: RoundtripOnewayData[];
+  roundtripOnewayData: ChartData[];
   bookingsByPeriodData: BookingsByPeriod[];
   bookingsByHourData: BookingsByHour[]; // New state
   loading: boolean;
   error: string | null;
-  fetchChartData: (period: 'day' | 'week' | 'month') => Promise<void>;
+  fetchChartData: () => Promise<void>;
 }
 
 export const useChartStore = create<ChartState>((set) => ({
@@ -19,13 +19,13 @@ export const useChartStore = create<ChartState>((set) => ({
   bookingsByHourData: [], // Initialize new state
   loading: false,
   error: null,
-  fetchChartData: async (period) => {
+  fetchChartData: async () => {
     set({ loading: true, error: null });
     try {
       const [phoneResult, roundtripResult, bookingsPeriodResult, bookingsHourResult] = await Promise.allSettled([
         getPhoneOriginDistribution(),
         getRoundtripVsOneway(),
-        getDashboardBookingsByDay(period),
+        getDashboardBookingsByDay(),
         getDashboardBookingsByHour(), // New API call
       ]);
 

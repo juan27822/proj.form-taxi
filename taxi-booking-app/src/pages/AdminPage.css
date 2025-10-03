@@ -15,8 +15,12 @@
   color: #2c3e50;
 }
 
+.admin-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .admin-header-actions button {
-  margin-left: 10px;
   padding: 8px 16px;
   border: none;
   border-radius: 5px;

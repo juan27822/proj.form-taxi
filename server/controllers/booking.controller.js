@@ -116,6 +116,8 @@ const searchBookings = async (req, res) => {
     }
     if (startDate && endDate) {
         filters.arrival_date = { gte: startDate, lte: endDate };
+    } else if (startDate) {
+        filters.arrival_date = { gte: startDate };
     }
     if (startTime && endTime) {
         filters.arrival_time = {
@@ -358,95 +360,100 @@ const updateBooking = async (req, res) => {
         }
 
         // --- 4. Compare and build the HTML for the email ---
-        const bookingFieldLabels = {
-            name: t(lang, 'name_label'),
-            phone: t(lang, 'phone_label'),
-            email: t(lang, 'email_label'),
-            people: t(lang, 'people_label'),
-            hasMinors: t(lang, 'has_minors_label'),
-            minorsAge: t(lang, 'minors_age_label'),
-            needsBabySeat: t(lang, 'needs_baby_seat_label'),
-            needsBooster: t(lang, 'needs_booster_label'),
-            luggageType: t(lang, 'luggage_type_label'),
-            arrival_date: t(lang, 'arrival_date_label'),
-            arrival_time: t(lang, 'arrival_time_label'),
-            arrival_flight_number: t(lang, 'arrival_flight_label'),
-            destination: t(lang, 'destination_label'),
-            return_date: t(lang, 'return_date_label'),
-            return_time: t(lang, 'return_time_label'),
-            return_flight_time: t(lang, 'return_flight_time_label'),
-            return_pickup_address: t(lang, 'return_pickup_label'),
-            return_flight_number: t(lang, 'return_flight_label'),
-            additional_info: t(lang, 'additional_info'),
-            driverId: t(lang, 'driver_name_label'), // Add driver
-        };
-
-        let detailsHtml = '<ul>';
-        for (const key of Object.keys(bookingFieldLabels)) {
-            const originalValue = originalBooking[key];
-            let updatedValue = updatedBooking[key];
-            const label = bookingFieldLabels[key];
-
-            // Special handling for driver
-            if (key === 'driverId') {
-                const originalDriver = originalBooking.driver;
-                const updatedDriver = updatedBooking.driver;
-
-                const originalDriverName = originalDriver ? originalDriver.name : 'N/A';
-                const updatedDriverName = updatedDriver ? updatedDriver.name : 'N/A';
-
-                if (originalDriverName !== updatedDriverName) {
-                    detailsHtml += `<li style="background-color: #ffecb3;"><b>${label}:</b> ${updatedDriverName} (<i>${t(lang, 'previously')}: ${originalDriverName}</i>)</li>`;
-                } else {
-                    detailsHtml += `<li><b>${label}:</b> ${updatedDriverName}</li>`;
-                }
-                continue; // Skip to next iteration
-            }
-
-
-            const formatValue = (val) => {
-                if (typeof val === 'boolean') return val ? t(lang, 'yes') : t(lang, 'no');
-                return val || 'N/A';
+        try {
+            const bookingFieldLabels = {
+                name: t(lang, 'name_label'),
+                phone: t(lang, 'phone_label'),
+                email: t(lang, 'email_label'),
+                people: t(lang, 'people_label'),
+                hasMinors: t(lang, 'has_minors_label'),
+                minorsAge: t(lang, 'minors_age_label'),
+                needsBabySeat: t(lang, 'needs_baby_seat_label'),
+                needsBooster: t(lang, 'needs_booster_label'),
+                luggageType: t(lang, 'luggage_type_label'),
+                arrival_date: t(lang, 'arrival_date_label'),
+                arrival_time: t(lang, 'arrival_time_label'),
+                arrival_flight_number: t(lang, 'arrival_flight_label'),
+                destination: t(lang, 'destination_label'),
+                return_date: t(lang, 'return_date_label'),
+                return_time: t(lang, 'return_time_label'),
+                return_flight_time: t(lang, 'return_flight_time_label'),
+                return_pickup_address: t(lang, 'return_pickup_label'),
+                return_flight_number: t(lang, 'return_flight_label'),
+                additional_info: t(lang, 'additional_info'),
+                driverId: t(lang, 'driver_name_label'), // Add driver
             };
 
-            const originalFormatted = formatValue(originalValue);
-            const updatedFormatted = formatValue(updatedValue);
+            let detailsHtml = '<ul>';
+            for (const key of Object.keys(bookingFieldLabels)) {
+                const originalValue = originalBooking[key];
+                let updatedValue = updatedBooking[key];
+                const label = bookingFieldLabels[key];
 
-            if (String(originalValue) !== String(updatedValue)) {
-                detailsHtml += `<li style="background-color: #ffecb3;"><b>${label}:</b> ${updatedFormatted} (<i>${t(lang, 'previously')}: ${originalFormatted}</i>)</li>`;
-            } else {
-                detailsHtml += `<li><b>${label}:</b> ${updatedFormatted}</li>`;
+                // Special handling for driver
+                if (key === 'driverId') {
+                    const originalDriver = originalBooking.driver;
+                    const updatedDriver = updatedBooking.driver;
+
+                    const originalDriverName = originalDriver ? originalDriver.name : 'N/A';
+                    const updatedDriverName = updatedDriver ? updatedDriver.name : 'N/A';
+
+                    if (originalDriverName !== updatedDriverName) {
+                        detailsHtml += `<li style="background-color: #ffecb3;"><b>${label}:</b> ${updatedDriverName} (<i>${t(lang, 'previously')}: ${originalDriverName}</i>)</li>`;
+                    } else {
+                        detailsHtml += `<li><b>${label}:</b> ${updatedDriverName}</li>`;
+                    }
+                    continue; // Skip to next iteration
+                }
+
+
+                const formatValue = (val) => {
+                    if (typeof val === 'boolean') return val ? t(lang, 'yes') : t(lang, 'no');
+                    return val || 'N/A';
+                };
+
+                const originalFormatted = formatValue(originalValue);
+                const updatedFormatted = formatValue(updatedValue);
+
+                if (String(originalValue) !== String(updatedValue)) {
+                    detailsHtml += `<li style="background-color: #ffecb3;"><b>${label}:</b> ${updatedFormatted} (<i>${t(lang, 'previously')}: ${originalFormatted}</i>)</li>`;
+                } else {
+                    detailsHtml += `<li><b>${label}:</b> ${updatedFormatted}</li>`;
+                }
             }
+            // Add driver phone if driver is assigned
+            if (updatedBooking.driver) {
+                detailsHtml += `<li><b>${t(lang, 'driver_phone_label')}:</b> ${updatedBooking.driver.phone}</li>`;
+            }
+
+            detailsHtml += '</ul>';
+
+            // --- 5. Send the email with the highlighted changes ---
+            const emailHtml = `
+              <h1>${t(lang, 'email_update_title')}</h1>
+              <p>${t(lang, 'email_greeting', { name: updatedBooking.name })}</p>
+              <p>${t(lang, 'email_update_body_intro')}</p>
+              <p><b>${t(lang, 'email_details_header')}</b></p>
+              ${detailsHtml}
+              <p>${t(lang, 'email_update_body_outro')}</p>
+              <p>${t(lang, 'email_farewell')}</p>
+            `;
+
+            await transporter.sendMail({
+                from: '"Your Taxi Service" <noreply@yourcompany.com>',
+                to: updatedBooking.email,
+                subject: t(lang, 'email_update_subject'),
+                html: emailHtml
+            });
+        } catch (emailError) {
+            console.error("Failed to send update email, but booking was updated successfully:", emailError);
+            // Do not re-throw; allow the main operation to succeed.
         }
-         // Add driver phone if driver is assigned
-        if (updatedBooking.driver) {
-            detailsHtml += `<li><b>${t(lang, 'driver_phone_label')}:</b> ${updatedBooking.driver.phone}</li>`;
-        }
-
-        detailsHtml += '</ul>';
-
-        // --- 5. Send the email with the highlighted changes ---
-        const emailHtml = `
-          <h1>${t(lang, 'email_update_title')}</h1>
-          <p>${t(lang, 'email_greeting', { name: updatedBooking.name })}</p>
-          <p>${t(lang, 'email_update_body_intro')}</p>
-          <p><b>${t(lang, 'email_details_header')}</b></p>
-          ${detailsHtml}
-          <p>${t(lang, 'email_update_body_outro')}</p>
-          <p>${t(lang, 'email_farewell')}</p>
-        `;
-
-        await transporter.sendMail({
-            from: '"Your Taxi Service" <noreply@yourcompany.com>',
-            to: updatedBooking.email,
-            subject: t(lang, 'email_update_subject'),
-            html: emailHtml
-        });
 
         res.json({ message: 'Booking updated successfully', booking: updatedBooking });
     } catch (error) {
-        console.error("Error updating booking:", error);
-        res.status(500).json({ message: "Error updating booking" });
+        console.error("Error updating booking in database:", error);
+        res.status(500).json({ message: `Error updating booking: ${error.message}` });
     }
 };
 

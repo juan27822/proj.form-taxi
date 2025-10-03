@@ -25,13 +25,8 @@ const ArchivedBookingsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token_v2');
-    if (!token) {
-      navigate('/admin'); // Si no hay token, vuelve al login/admin
-      return;
-    }
     fetchArchivedBookings();
-  }, [navigate]);
+  }, []);
 
   const handleUpdate = () => {
     // Si se edita una reserva archivada (ej. para desarchivarla), se refresca la lista

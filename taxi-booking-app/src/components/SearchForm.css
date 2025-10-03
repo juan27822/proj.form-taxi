@@ -1,20 +1,38 @@
 .search-form {
   display: flex;
-  flex-wrap: wrap; /* Permite que los elementos se ajusten en pantallas pequeñas */
-  gap: 12px;
+  flex-direction: column; /* Main axis is vertical */
+  gap: 16px;
   margin-bottom: 20px;
   background-color: #fff;
-  padding: 15px;
+  padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.search-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search-group label {
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #495057;
+}
+
 .search-form input,
 .search-form select {
-  padding: 8px 12px; /* Padding reducido */
-  border: 1px solid #ced4da; /* Color de borde más suave */
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
   border-radius: 6px;
-  font-size: 0.9rem; /* Fuente ligeramente más pequeña */
+  font-size: 0.9rem;
   background-color: #f8f9fa;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -23,11 +41,18 @@
 .search-form select:focus {
   outline: none;
   border-color: var(--primary-blue);
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+.search-actions {
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 12px;
+  margin-top: 10px; /* Add some space above the buttons */
 }
 
 .search-form button {
-  padding: 8px 16px; /* Padding consistente con otros botones */
+  padding: 10px 20px;
   background-color: var(--primary-blue);
   color: white;
   border: none;
@@ -35,4 +60,12 @@
   cursor: pointer;
   font-weight: 500;
   transition: background-color 0.2s;
+}
+
+.search-form button[type="button"] {
+  background-color: #6c757d; /* A different color for the clear button */
+}
+
+.search-form button:hover {
+  opacity: 0.9;
 }

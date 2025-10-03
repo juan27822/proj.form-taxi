@@ -5,7 +5,10 @@ import AdminPage from './pages/AdminPage';
 import CheckBookingPage from './pages/CheckBookingPage';
 import ChartsPage from './components/ChartsPage'; // Import ChartsPage
 import ArchivedBookingsPage from './pages/ArchivedBookingsPage'; // Import ArchivedBookingsPage
+import ProtectedRoute from './components/ProtectedRoute';
+import LoginForm from './components/LoginForm';
 import './index.css'; // Keep global styles
+import './App.css'; // <-- AÑADE ESTA LÍNEA PARA CARGAR LOS ESTILOS DEL FORMULARIO
 
 const App: React.FC = () => {
 
@@ -51,11 +54,17 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<ClientPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/admin/archived" element={<ArchivedBookingsPage />} />
+        <Route path="/login" element={<LoginForm />} />
         <Route path="/check-booking" element={<CheckBookingPage />} />
-        <Route path="/charts" element={<ChartsPage />} /> {/* Add new route for ChartsPage */}
+
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute loginPath="/login" />}>
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/archived" element={<ArchivedBookingsPage />} />
+          <Route path="/charts" element={<ChartsPage />} /> {/* Add new route for ChartsPage */}
+        </Route>
       </Routes>
     </Router>
   );

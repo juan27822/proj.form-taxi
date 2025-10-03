@@ -20,7 +20,7 @@ const { validateUser } = require('./middleware');
 
 const prisma = new PrismaClient();
 const app = express();
-const PORT = 3001;
+const PORT = 3002; // Or any other available port
 
 // --- VAPID Configuration ---
 const vapidKeys = {
@@ -28,11 +28,13 @@ const vapidKeys = {
   privateKey: process.env.VAPID_PRIVATE_KEY,
 };
 
-webpush.setVapidDetails(
-  'mailto:juan.nadal.ferrer@gmail.com',
-  vapidKeys.publicKey,
-  vapidKeys.privateKey
-);
+if (vapidKeys.publicKey && vapidKeys.privateKey) {
+  webpush.setVapidDetails(
+    'mailto:juan.nadal.ferrer@gmail.com',
+    vapidKeys.publicKey,
+    vapidKeys.privateKey
+  );
+}
 
 // --- Internationalization Setup ---
 loadTranslations();
@@ -48,7 +50,8 @@ const corsOptions = {
     /^http:\/\/192\.168\.\d+\.\d+:5173$/,
     /https:\/\/.+\.ngrok-free\.app/
   ],
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  allowedHeaders: ['Content-Type', 'Authorization'] // <-- AÑADIR ESTA LÍNEA
 };
 
 app.use(cors(corsOptions));
@@ -56,11 +59,15 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../dist')));
 
 // Override restrictive CSP headers
-app.use((req, res, next) => {
-  // Una política más permisiva para el desarrollo con ngrok
-  res.setHeader("Content-Security-Policy", "connect-src 'self' *;");
-  next();
-});
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    res.setHeader(
+      "Content-Security-Policy",
+      "connect-src 'self' http://localhost:3002 ws://localhost:3002"
+    );
+    next();
+  });
+}
 
 // --- Socket.IO Setup ---
 const httpServer = http.createServer(app);
@@ -105,7 +112,7 @@ app.post('/api/subscribe', (req, res) => {
 
 
 // Auth routes
-app.post('/api/register', validateUser, async (req, res) => {
+app.post('/api/register', async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const user = await prisma.user.create({
@@ -120,14 +127,14 @@ app.post('/api/register', validateUser, async (req, res) => {
     }
 });
 
-app.post('/api/login', validateUser, async (req, res) => {
+app.post('/api/login', async (req, res) => {
     const user = await prisma.user.findUnique({ where: { username: req.body.username } });
     if (user == null) {
         return res.status(400).json({ message: 'Cannot find user' });
     }
     try {
         if (await bcrypt.compare(req.body.password, user.password)) {
-            const accessToken = jwt.sign({ username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
+                        const accessToken = jwt.sign({ username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '365d' });
             res.json({ accessToken: accessToken });
         } else {
             res.status(401).json({ message: 'Invalid credentials' });

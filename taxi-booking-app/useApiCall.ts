@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+
 
 type NotificationType = 'success' | 'error';
 
@@ -32,7 +32,7 @@ export const useApiCall = (): UseApiCallReturn => {
       onSuccess?.();
     } catch (error) {
       console.error(errorMessage, error);
-      const message = (error as any)?.response?.data?.message || errorMessage;
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage;
       setNotification({ message, type: 'error' });
     } finally {
       setIsLoading(false);

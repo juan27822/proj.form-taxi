@@ -29,10 +29,18 @@
 
 .App-main {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  /* Mobile-first: una sola columna por defecto */
+  grid-template-columns: 1fr;
   gap: 40px;
   padding: 20px;
   align-items: start;
+}
+
+/* Vista para escritorio (más de 992px) */
+@media (min-width: 992px) {
+  .App-main {
+    grid-template-columns: 1fr 2fr; /* Dos columnas en pantallas grandes */
+  }
 }
 
 .form-container, .list-container {
@@ -74,4 +82,46 @@ h2 {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* --- Estilos para alinear formularios --- */
+
+.form-group {
+  display: flex;
+  flex-direction: column; /* Apilado por defecto (móvil) */
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: var(--neutral-dark);
+}
+
+/* Vista para escritorio (más de 768px) */
+@media (min-width: 768px) {
+  .form-group {
+    flex-direction: row; /* Lado a lado */
+    align-items: center;
+  }
+  .form-group label {
+    margin-bottom: 0;
+    margin-right: 10px;
+    width: 180px; /* Ancho fijo para alinear los campos */
+    text-align: right;
+    flex-shrink: 0; /* Evita que la etiqueta se encoja */
+  }
+}
+
+/* --- Estilos para alinear campos anidados (como fecha y hora) --- */
+.form-group > div {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espacio entre los campos, ej: hh : mm */
+}
+
+.form-group > div > input {
+  width: auto; /* Permite que los campos de hora/fecha tengan un ancho más natural */
+  flex-grow: 1;
 }

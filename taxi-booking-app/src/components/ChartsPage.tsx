@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useChartStore } from '../store/chartStore';
+import { useChartStore } from '../stores/chartStore';
 import Dashboard from './Dashboard';
 import PhoneOriginChart from './charts/PhoneOriginChart';
 import RoundtripOnewayChart from './charts/RoundtripOnewayChart';
@@ -25,7 +25,7 @@ const itemStyle: React.CSSProperties = {
 
 const ChartsPage: React.FC = () => {
   const { t } = useTranslation();
-  const [period, setPeriod] = useState<'day' | 'week' | 'month'>('month');
+
 
   const {
     phoneOriginData,
@@ -38,8 +38,8 @@ const ChartsPage: React.FC = () => {
   } = useChartStore();
 
   useEffect(() => {
-    fetchChartData(period);
-  }, [period, fetchChartData]);
+    fetchChartData();
+  }, [fetchChartData]);
 
   if (loading) {
     return <div style={{ padding: '20px' }}><h1>{t('charts_title')}</h1><p>{t('loading')}...</p></div>;
@@ -55,11 +55,9 @@ const ChartsPage: React.FC = () => {
 
       <div style={containerStyle}>
         <div style={itemStyle}><PhoneOriginChart data={phoneOriginData} /></div>
-        <div style={itemStyle}><RoundtripOnewayChart data={roundtripOnewayData.map(item => ({ name: item.type, value: item.count }))} /></div>
+        <div style={itemStyle}><RoundtripOnewayChart data={roundtripOnewayData} /></div>
         <div style={itemStyle}><BookingsByPeriodChart 
           data={bookingsByPeriodData} 
-          period={period} 
-          setPeriod={setPeriod} 
         /></div>
         <div style={itemStyle}><BookingsByHourChart data={bookingsByHourData} /></div>
       </div>

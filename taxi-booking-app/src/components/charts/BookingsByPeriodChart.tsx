@@ -5,22 +5,16 @@ import { BookingsByPeriod } from '../../types'; // Changed import
 
 interface Props {
   data: BookingsByPeriod[]; // Changed type
-  period: 'day' | 'week' | 'month';
-  setPeriod: (period: 'day' | 'week' | 'month') => void;
   className?: string;
 }
 
-const BookingsByPeriodChart: React.FC<Props> = ({ data, period, setPeriod, className }) => {
+const BookingsByPeriodChart: React.FC<Props> = ({ data, className }) => {
   const { t } = useTranslation();
 
   return (
     <div className={className}>
       <h2>{t('bookings_by_period_chart_title')}</h2>
-      <div className="period-selector">
-        <button onClick={() => setPeriod('day')} className={period === 'day' ? 'active' : ''}>{t('daily')}</button>
-        <button onClick={() => setPeriod('week')} className={period === 'week' ? 'active' : ''}>{t('weekly')}</button>
-        <button onClick={() => setPeriod('month')} className={period === 'month' ? 'active' : ''}>{t('monthly')}</button>
-      </div>
+
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />

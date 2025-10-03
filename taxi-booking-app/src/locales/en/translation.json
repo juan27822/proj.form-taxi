@@ -176,5 +176,9 @@
   "booster_seat_col": "Booster Seat",
   "more_info_btn": "More Info",
   "minors_age_col": "Minors Age",
-  "luggage_type_col": "Luggage"
+  "luggage_type_col": "Luggage",
+  "destination_col": "Destination",
+  "show_search": "Show Search",
+  "hide_search": "Hide Search",
+  "unassigned_today_card_title": "Unassigned (Today)"
 }

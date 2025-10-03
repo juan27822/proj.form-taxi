@@ -1,30 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { login } from '../api';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../stores/authStore';
 
-interface LoginFormProps {
-  onLogin: (token: string) => void;
-}
-
-const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
+const LoginForm: React.FC = () => {
   const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const { login, isLoading, error, clearError } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Limpia el error del store cuando el componente se desmonta
+    return () => clearError();
+  }, [clearError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     try {
-      const data = await login({ username: username, password: password });
-      onLogin(data.accessToken);
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response) {
-        setError(error.response.data.message);
-      } else {
-        setError(t('login_error'));
-      }
+      await login({ username, password });
+      navigate('/admin');
+    } catch (err) {
+      // El error ya se maneja y se guarda en el store, solo evitamos que la consola muestre un error no capturado.
+      console.error("Login attempt failed");
     }
   };
 
@@ -39,7 +37,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         <label>{t('password')}</label>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
       </div>
-      <button type="submit">{t('login')}</button>
+      <button type="submit" disabled={isLoading}>
+        {isLoading ? t('submitting_button') : t('login')}
+      </button>
     </form>
   );
 };

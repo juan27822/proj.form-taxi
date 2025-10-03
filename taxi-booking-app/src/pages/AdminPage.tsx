@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../stores/authStore';
 import { useBookingStore } from '../stores/useBookingStore';
 import AdminDashboard from './AdminDashboard';
 import DriverManagement from '../components/DriverManagement';

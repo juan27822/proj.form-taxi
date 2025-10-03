@@ -147,5 +147,9 @@
   "booster_seat_col": "Sitzerhöhung",
   "more_info_btn": "Mehr Info",
   "minors_age_col": "Alter der Minderjährigen",
-  "luggage_type_col": "Gepäck"
+  "luggage_type_col": "Gepäck",
+  "destination_col": "Ziel",
+  "show_search": "Suche anzeigen",
+  "hide_search": "Suche ausblenden",
+  "unassigned_today_card_title": "Nicht zugewiesen (heute)"
 }
