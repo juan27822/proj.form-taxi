@@ -1,0 +1,220 @@
+/* --- Contenedor Principal --- */
+.booking-form-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+/* --- Indicador de Pasos --- */
+.form-steps {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  color: #9e9e9e;
+  transition: color 0.3s ease;
+}
+
+.step.active {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.step-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.step.active .step-icon {
+  background-color: #007bff;
+}
+
+/* --- Estructura del Formulario --- */
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-section-title {
+  text-align: center;
+  color: #333;
+  font-size: 1.8rem;
+  margin-bottom: 0;
+}
+
+.form-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #444;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 0.5rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Grupos de Campos y Layout --- */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* --- Checkboxes --- */
+.form-group-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-group-checkbox.standalone {
+  margin-bottom: 1rem;
+}
+
+.form-group-checkbox input[type="checkbox"] {
+  width: 1.2em;
+  height: 1.2em;
+  cursor: pointer;
+}
+
+.form-group.indented {
+  padding-left: 2rem;
+  border-left: 3px solid #f0f0f0;
+  margin-top: 1rem;
+}
+
+/* --- Botones y Navegación --- */
+.form-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.button-primary, .button-secondary {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.button-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.button-primary:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.button-primary:disabled {
+  background-color: #a0c7ff;
+  cursor: not-allowed;
+}
+
+.button-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.button-secondary:hover {
+  background-color: #5a6268;
+}
+
+/* --- Mensajes --- */
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+}
+
+.submission-message {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+.submission-message.success { background-color: #e8f5e9; color: #2e7d32; }
+.submission-message.error { background-color: #ffebee; color: #c62828; }
+
+/* --- Adaptación a Móviles (Responsive) --- */
+@media (max-width: 768px) {
+  .booking-form-container {
+    padding: 1rem;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-navigation {
+    flex-direction: column-reverse;
+    gap: 1rem;
+  }
+}

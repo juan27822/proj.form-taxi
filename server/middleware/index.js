@@ -36,12 +36,29 @@ const userSchema = Joi.object({
 });
 
 const validateBooking = (req, res, next) => {
+    // For PUT requests, validation is more lenient.
+    if (req.method === 'PUT' || req.method === 'PATCH') {
+        const updateSchema = bookingSchema.fork(
+            ['name', 'phone', 'people', 'arrival_date', 'arrival_time', 'destination'],
+            (schema) => schema.optional()
+        );
+        const { error, value } = updateSchema.validate(req.body, { stripUnknown: true });
+
+        if (error) {
+            console.error("Joi validation error in validateBooking (for update):", error.details);
+            return res.status(400).json({ message: error.details[0].message, details: error.details });
+        }
+        req.body = value;
+        return next();
+    }
+
+    // For POST requests, use the strict schema.
     const { error, value } = bookingSchema.validate(req.body, { stripUnknown: true });
     if (error) {
-        console.error("Joi validation error in validateBooking:", error.details);
+        console.error("Joi validation error in validateBooking (for create):", error.details);
         return res.status(400).json({ message: error.details[0].message, details: error.details });
     }
-    req.body = value; // Assign the cleaned value back to req.body
+    req.body = value;
     next();
 };
 

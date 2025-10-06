@@ -55,7 +55,11 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(bodyParser.json());
+// Middleware para parsear el cuerpo de las peticiones
+// Reemplazamos bodyParser.json() por los middlewares integrados de Express
+app.use(express.json()); // Para parsear application/json
+app.use(express.urlencoded({ extended: true })); // Para parsear application/x-www-form-urlencoded
+
 app.use(express.static(path.join(__dirname, '../dist')));
 
 // Override restrictive CSP headers

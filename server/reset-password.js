@@ -4,23 +4,29 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  const username = 'juan';
-  const newPassword = 'password';
+  const username = 'juan'; // El usuario que quieres crear/actualizar
+  const newPassword = 'password'; // La contraseña que quieres establecer
 
-  // Hash the new password
+  console.log(`Intentando crear o actualizar el usuario: ${username}`);
+
+  // Hashear la nueva contraseña
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-  // Update the user's password in the database
-  const updatedUser = await prisma.user.update({
-    where: {
+  // Usar 'upsert' para crear el usuario si no existe, o actualizarlo si ya existe.
+  const user = await prisma.user.upsert({
+    where: { username: username },
+    update: { password: hashedPassword },
+    create: {
       username: username,
-    },
-    data: {
       password: hashedPassword,
+      role: 'ADMIN', // Asignar rol de administrador al crearlo
     },
   });
 
-  console.log(`Successfully updated password for user: ${updatedUser.username}`);
+  console.log(`✅ Contraseña actualizada correctamente para el usuario: ${user.username}`);
+  console.log('Ahora puedes iniciar sesión con:');
+  console.log(`   Usuario: ${username}`);
+  console.log(`   Contraseña: ${newPassword}`);
 }
 
 main()

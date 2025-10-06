@@ -1,21 +1,16 @@
 import axios from 'axios';
-import { useAuthStore } from './store/authStore';
+import { useAuthStore } from './authStore.ts';
 import { Booking, Driver, BookingsByPeriod, BookingsByHour, PhoneOriginData, RoundtripOnewayData, DashboardPopularDestinationData, SearchParams, Credentials } from './types';
 
 const api = axios.create({
   baseURL: '/api', // Usar la ruta relativa para que el proxy de Vite funcione
 });
 
-// Subscribe to the auth store to get the token
-let token: string | null = useAuthStore.getState().token;
-useAuthStore.subscribe((state) => {
-  token = state.token;
-});
-
 // --- Axios Interceptor ---
 // This automatically attaches the auth token to every request.
 api.interceptors.request.use(
   (config) => {
+    const token = useAuthStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,14 +19,22 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export { api };
+// --- Funciones de Autenticación (Auth) ---
+
+/**
+ * Inicia sesión de un usuario.
+ */
+export const login = async (credentials: Credentials) => {
+  const { data } = await api.post<{ accessToken: string }>('/login', credentials);
+  return data;
+};
 
 // --- Funciones de Reservas (Bookings) ---
 
 /**
  * Crea una nueva reserva. Esta función es para el formulario público.
  */
-export const createBooking = async (bookingData: Omit<Booking, 'id' | 'status' | 'createdAt' | 'receivedAt' | 'driver' | 'driverId'>) => {
+export const createBooking = async (bookingData: Omit<Booking, 'id' | 'status' | 'receivedAt' | 'driver' | 'driverId'>) => {
   const { data } = await api.post<Booking>('/bookings', bookingData);
   return data;
 };
@@ -188,15 +191,4 @@ export const getRoundtripVsOneway = async (): Promise<RoundtripOnewayData[]> => 
 export const getDashboardPopularDestinations = async (): Promise<DashboardPopularDestinationData[]> => {
     const { data } = await api.get<DashboardPopularDestinationData[]>('/dashboard/popular-destinations');
     return data;
-};
-
-
-// --- Funciones de Autenticación (Auth) ---
-
-/**
- * Inicia sesión de un usuario.
- */
-export const login = async (credentials: Credentials) => {
-  const { data } = await api.post<{ accessToken: string }>('/login', credentials);
-  return data;
 };

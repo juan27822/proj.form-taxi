@@ -42,7 +42,7 @@ const ArchivedBookingsPage: React.FC = () => {
         </div>
         <div className="admin-header-actions">
           <button onClick={() => navigate('/admin')}>
-            {t('back_to_dashboard_btn', 'Volver al Panel')}
+            {t('backToDashboardBtn', 'Volver al Panel')}
           </button>
         </div>
       </header>

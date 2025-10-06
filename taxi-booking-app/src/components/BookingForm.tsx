@@ -1,203 +1,240 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { createBooking } from '../api';
-import { useTheme, useMediaQuery, Button, CircularProgress, Alert, Box, Stepper, Step, StepLabel } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
+import { Booking } from '../types';
+import './BookingForm.css';
+import { FaUser, FaPhone, FaEnvelope, FaUsers, FaChild, FaCar, FaPlaneDeparture, FaPlaneArrival, FaCalendarAlt, FaClock, FaInfoCircle, FaLuggageCart } from 'react-icons/fa';
 
-import TripDetailsStep from './booking-form-steps/TripDetailsStep';
-import PassengerDetailsStep from './booking-form-steps/PassengerDetailsStep';
-import ReturnTripStep from './booking-form-steps/ReturnTripStep';
-import ReviewStep from './booking-form-steps/ReviewStep';
-
-const steps = ['trip_details', 'passenger_details', 'return_trip', 'review_and_submit'];
-const FORM_DATA_KEY = 'bookingFormData';
+type BookingFormData = Omit<Booking, 'id' | 'status' | 'receivedAt' | 'driver' | 'driverId'>;
 
 const BookingForm: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const [activeStep, setActiveStep] = useState(0);
-  
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<'success' | 'error' | null>(null);
+  const [isReturnTrip, setIsReturnTrip] = useState(false);
 
-  const bookingSchema = z.object({
-    name: z.string().min(1, t('validation_name_required')),
-    phone: z.string().min(1, t('validation_phone_required')),
-    email: z.string().email(t('validation_email_invalid')).optional().or(z.literal('')),
-    people: z.number().min(1, t('validation_people_min')),
-    hasMinors: z.boolean(),
-    minorsAge: z.string().optional(),
-    needsBabySeat: z.boolean(),
-    needsBooster: z.boolean(),
-    luggageType: z.string().min(1, t('validation_luggage_required')),
-    arrival_date: z.any().refine(val => val, { message: t('validation_arrival_date_required') }),
-    arrival_time: z.any().refine(val => val, { message: t('validation_arrival_time_required') }),
-    arrival_flight_number: z.string().optional(),
-    destination: z.string().min(1, t('validation_destination_required')),
-    return_date: z.any().optional(),
-    return_time: z.any().optional(),
-    return_flight_time: z.string().optional(),
-    return_pickup_address: z.string().optional(),
-    return_flight_number: z.string().optional(),
-    additional_info: z.string().optional(),
-    isModification: z.boolean(),
-    originalBookingId: z.string().optional(),
+  const { register, handleSubmit, formState: { errors }, watch, setValue, trigger } = useForm<BookingFormData>({
+    defaultValues: { lang: i18n.language },
+    mode: 'onChange',
   });
 
-  type BookingFormData = z.infer<typeof bookingSchema>;
-
-  const savedData = localStorage.getItem(FORM_DATA_KEY);
-  const defaultValues = savedData ? JSON.parse(savedData, (key, value) => {
-    if ([ 'arrival_date', 'arrival_time', 'return_date', 'return_time'].includes(key) && value) {
-      return dayjs(value);
-    }
-    return value;
-  }) : {
-    name: '',
-    phone: '',
-    email: '',
-    people: 1,
-    hasMinors: false,
-    minorsAge: '',
-    needsBabySeat: false,
-    needsBooster: false,
-    luggageType: '',
-    arrival_date: null,
-    arrival_time: null,
-    arrival_flight_number: '',
-    destination: '',
-    return_date: null,
-    return_time: null,
-    return_flight_time: '',
-    return_pickup_address: '',
-    return_flight_number: '',
-    additional_info: '',
-    isModification: false,
-    originalBookingId: '',
-  };
-
-  const methods = useForm<BookingFormData>({
-    resolver: zodResolver(bookingSchema),
-    defaultValues,
-    mode: 'onChange'
-  });
-
-  const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error', message: string} | null>(null);
-
-  const watchedData = methods.watch();
-  useEffect(() => {
-    localStorage.setItem(FORM_DATA_KEY, JSON.stringify(watchedData));
-  }, [watchedData]);
-
-  useEffect(() => {
-    if (statusMessage) {
-      const timer = setTimeout(() => {
-        setStatusMessage(null);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [statusMessage]);
-
-  const handleNext = async () => {
-    const fieldsByStep: (keyof BookingFormData)[][] = [
-        ['arrival_date', 'arrival_time', 'destination'], 
-        ['name', 'phone', 'email', 'people', 'luggageType'],
-        [] // No validation for optional return trip step
-    ];
-    const isValid = activeStep >= fieldsByStep.length ? true : await methods.trigger(fieldsByStep[activeStep]);
-    if (isValid) {
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    }
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+  const hasMinors = watch("hasMinors");
 
   const onSubmit = async (data: BookingFormData) => {
-    setStatusMessage(null);
+    setIsSubmitting(true);
+    setSubmissionStatus(null);
     try {
-      const dataToSend = {
-        ...data,
-        email: data.email || null,
-        minorsAge: data.minorsAge || null,
-        arrival_flight_number: data.arrival_flight_number || null,
-        return_flight_time: data.return_flight_time || null,
-        return_pickup_address: data.return_pickup_address || null,
-        return_flight_number: data.return_flight_number || null,
-        additional_info: data.additional_info || null,
-        originalBookingId: data.originalBookingId || null,
-        arrival_date: dayjs(data.arrival_date).format('YYYY-MM-DD'),
-        arrival_time: dayjs(data.arrival_time).format('HH:mm'),
-        return_date: data.return_date ? dayjs(data.return_date).format('YYYY-MM-DD') : null,
-        return_time: data.return_time ? dayjs(data.return_time).format('HH:mm') : null,
-        lang: i18n.language,
-      };
-      await createBooking(dataToSend);
-      setStatusMessage({ type: 'success', message: t('booking_success_message') });
-      methods.reset();
-      localStorage.removeItem(FORM_DATA_KEY);
-      setActiveStep(0);
+      await createBooking(data);
+      setSubmissionStatus('success');
     } catch (error: unknown) {
-      setStatusMessage({ type: 'error', message: t('booking_error_message') });
+      setSubmissionStatus('error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const getStepContent = (step: number) => {
-    switch (step) {
-      case 0:
-        return <TripDetailsStep />;
-      case 1:
-        return <PassengerDetailsStep />;
-      case 2:
-        return <ReturnTripStep />;
-      case 3:
-        return <ReviewStep />;
-      default:
-        return 'Unknown step';
+  const handleNextStep = async () => {
+    const fieldsToValidate: (keyof BookingFormData)[] = [
+      'arrival_date', 'arrival_time', 'destination', 'people'
+    ];
+    if (isReturnTrip) {
+      fieldsToValidate.push('return_date', 'return_time');
     }
+    const isValid = await trigger(fieldsToValidate);
+    if (isValid) {
+      setStep(2);
+    }
+  };
+
+  const handlePrevStep = () => {
+    setStep(1);
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <FormProvider {...methods}>
-        <Box component="form" onSubmit={methods.handleSubmit(onSubmit)} sx={{ mt: 3 }}>
-          <Stepper activeStep={activeStep} orientation={isMobile ? 'vertical' : 'horizontal'} sx={{ mb: 4 }}>
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{t(label)}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
+    <div className="booking-form-container">
+      <div className="form-steps">
+        <div className={`step ${step === 1 ? 'active' : ''}`}>
+          <div className="step-icon">1</div>
+          <div className="step-label">{t('step1_title')}</div>
+        </div>
+        <div className={`step ${step === 2 ? 'active' : ''}`}>
+          <div className="step-icon">2</div>
+          <div className="step-label">{t('step2_title')}</div>
+        </div>
+      </div>
 
-          {getStepContent(activeStep)}
+      <form onSubmit={handleSubmit(onSubmit)} className="booking-form">
+        {step === 1 && (
+          <div className="form-step-content">
+            <h3 className="form-section-title">{t('step1_title')}</h3>
 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-            {activeStep !== 0 && (
-              <Button onClick={handleBack} sx={{ mr: 1 }}>
-                {t('back_button')}
-              </Button>
-            )}
+            {/* Arrival Section */}
+            <div className="form-section">
+              <h4><FaPlaneArrival /> {t('arrival_info_title')}</h4>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="arrival_date"><FaCalendarAlt /> {t('arrival_date_label')}</label>
+                  <input type="date" id="arrival_date" {...register('arrival_date', { required: t('arrival_date_error_required') })} />
+                  {errors.arrival_date && <p className="error-message">{errors.arrival_date.message}</p>}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="arrival_time"><FaClock /> {t('arrival_time_label')}</label>
+                  <input type="time" id="arrival_time" {...register('arrival_time', { required: t('arrival_time_error_required') })} />
+                  {errors.arrival_time && <p className="error-message">{errors.arrival_time.message}</p>}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="arrival_flight_number">{t('arrival_flight_number_label')}</label>
+                  <input id="arrival_flight_number" {...register('arrival_flight_number')} placeholder={t('optional_placeholder')} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="destination">{t('destination_label')}</label>
+                  <input id="destination" {...register('destination', { required: t('destination_error_required') })} />
+                  {errors.destination && <p className="error-message">{errors.destination.message}</p>}
+                </div>
+              </div>
+            </div>
 
-            {activeStep === steps.length - 1 ? (
-              <Button type="submit" variant="contained" color="primary" disabled={methods.formState.isSubmitting}>
-                {methods.formState.isSubmitting ? <CircularProgress size={24} /> : t('submit_button')}
-              </Button>
-            ) : (
-              <Button variant="contained" onClick={handleNext}>
-                {t('next_button')}
-              </Button>
-            )}
-          </Box>
+            {/* Return Trip Section */}
+            <div className="form-section">
+              <div className="form-group-checkbox standalone">
+                <input
+                  type="checkbox"
+                  id="returnTrip"
+                  checked={isReturnTrip}
+                  onChange={(e) => setIsReturnTrip(e.target.checked)}
+                />
+                <label htmlFor="returnTrip">{t('return_trip_label')}</label>
+              </div>
 
-          {statusMessage && <Alert severity={statusMessage.type} sx={{ mt: 2 }}>{statusMessage.message}</Alert>}
-        </Box>
-      </FormProvider>
-    </LocalizationProvider>
+              {isReturnTrip && (
+                <>
+                  <h4><FaPlaneDeparture /> {t('return_info_title')}</h4>
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label htmlFor="return_date"><FaCalendarAlt /> {t('return_date_label')}</label>
+                      <input type="date" id="return_date" {...register('return_date', { required: isReturnTrip ? t('return_date_error_required') : false })} />
+                      {errors.return_date && <p className="error-message">{errors.return_date.message}</p>}
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="return_time"><FaClock /> {t('return_time_label')}</label>
+                      <input type="time" id="return_time" {...register('return_time', { required: isReturnTrip ? t('return_time_error_required') : false })} />
+                      {errors.return_time && <p className="error-message">{errors.return_time.message}</p>}
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="return_flight_time">{t('return_flight_time_label')}</label>
+                      <input type="time" id="return_flight_time" {...register('return_flight_time')} placeholder={t('optional_placeholder')} />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="return_pickup_address">{t('return_pickup_address_label')}</label>
+                      <input id="return_pickup_address" {...register('return_pickup_address')} />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="form-navigation">
+              <button type="button" className="button-primary" onClick={handleNextStep}>{t('next_button')}</button>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="form-step-content">
+            <h3 className="form-section-title">{t('step2_title')}</h3>
+
+            {/* Contact and Passenger Info */}
+            <div className="form-section">
+               <h4><FaUser /> {t('personal_info_title')}</h4>
+               <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="name"><FaUser /> {t('name_label')}</label>
+                  <input id="name" {...register('name', { required: t('name_error_required') })} />
+                  {errors.name && <p className="error-message">{errors.name.message}</p>}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="phone"><FaPhone /> {t('phone_label')}</label>
+                  <input id="phone" type="tel" {...register('phone', { required: t('phone_error_required') })} />
+                  {errors.phone && <p className="error-message">{errors.phone.message}</p>}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="email"><FaEnvelope /> {t('email_label')}</label>
+                  <input id="email" type="email" {...register('email')} placeholder={t('optional_placeholder')} />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="people"><FaUsers /> {t('people_label')}</label>
+                  <input type="number" id="people" {...register('people', { required: t('people_error_required'), min: 1 })} min="1" />
+                  {errors.people && <p className="error-message">{errors.people.message}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* Extras Section */}
+            <div className="form-section">
+              <h4><FaChild /> {t('extras_title')}</h4>
+              <div className="form-group-checkbox">
+                <input type="checkbox" id="hasMinors" {...register('hasMinors')} />
+                <label htmlFor="hasMinors">{t('has_minors_label')}</label>
+              </div>
+
+              {hasMinors && (
+                <div className="form-group indented">
+                  <label htmlFor="minorsAge">{t('minors_age_label')}</label>
+                  <input id="minorsAge" {...register('minorsAge')} />
+                </div>
+              )}
+
+              <div className="form-group-checkbox">
+                <input type="checkbox" id="needsBabySeat" {...register('needsBabySeat')} />
+                <label htmlFor="needsBabySeat">{t('needs_baby_seat_label')}</label>
+              </div>
+
+              <div className="form-group-checkbox">
+                <input type="checkbox" id="needsBooster" {...register('needsBooster')} />
+                <label htmlFor="needsBooster">{t('needs_booster_label')}</label>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="luggageType"><FaLuggageCart /> {t('luggage_type_label')}</label>
+                <input id="luggageType" {...register('luggageType')} placeholder={t('luggage_type_placeholder')} />
+              </div>
+            </div>
+
+            {/* Additional Info */}
+            <div className="form-section">
+              <h4><FaInfoCircle /> {t('additional_info_title')}</h4>
+              <div className="form-group">
+                <textarea id="additional_info" {...register('additional_info')} rows={4} placeholder={t('additional_info_placeholder')} />
+              </div>
+            </div>
+
+            <div className="form-navigation">
+              <button type="button" className="button-secondary" onClick={handlePrevStep}>{t('back_button')}</button>
+              <button type="submit" className="button-primary" disabled={isSubmitting}>
+                {isSubmitting ? t('submitting_button') : t('submit_button')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {submissionStatus === 'success' && (
+          <div className="submission-message success">
+            <p>{t('booking_success_message')}</p>
+            <p>{t('booking_success_advice')}</p>
+          </div>
+        )}
+        {submissionStatus === 'error' && (
+          <div className="submission-message error">
+            <p>{t('booking_error_message')}</p>
+          </div>
+        )}
+      </form>
+    </div>
   );
 };
 

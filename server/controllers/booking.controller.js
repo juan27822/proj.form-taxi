@@ -307,7 +307,7 @@ const updateBooking = async (req, res) => {
             needsBooster, luggageType, arrival_date, arrival_time,
             arrival_flight_number, destination, return_date, return_time,
             return_flight_time, return_pickup_address, return_flight_number,
-            additional_info, isModification, originalBookingId, driverId
+            additional_info, isModification, originalBookingId, driverId, status
         } = req.body;
 
         const parsedPeople = parseInt(people, 10);
@@ -322,6 +322,7 @@ const updateBooking = async (req, res) => {
             originalBookingId,
             lang: req.body.lang, // Get lang directly from body
             driverId: driverId === '' ? null : driverId,
+            status,
         };
 
         // --- CORRECCIÓN: Asegurar que la fecha se guarda en formato YYYY-MM-DD también al actualizar ---

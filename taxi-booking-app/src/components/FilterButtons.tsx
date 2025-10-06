@@ -1,5 +1,6 @@
 import React from 'react';
 import { useBookingStore } from '../stores/useBookingStore';
+import './FilterButtons.css';
 
 const FilterButtons: React.FC = () => {
   const { setFilter, filter: currentFilter } = useBookingStore();
@@ -14,9 +15,14 @@ const FilterButtons: React.FC = () => {
   ];
 
   return (
-    <div className="filter-buttons" style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+    <div className="filter-buttons">
       {filters.map(({ label, value }) => (
-        <button key={value} onClick={() => setFilter(value)} disabled={currentFilter === value} style={{ padding: '8px 12px', cursor: 'pointer' }}>
+        <button
+          key={value}
+          onClick={() => setFilter(value)}
+          className={currentFilter === value ? 'active' : ''}
+          disabled={currentFilter === value}
+        >
           {label}
         </button>
       ))}
